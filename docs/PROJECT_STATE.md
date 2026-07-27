@@ -12,8 +12,9 @@
 
 **Milestone 3: Classification** -- IN PROGRESS
 - Phase 3.1 (A5: Evidence Requirement) -- COMPLETE (2026-07-27)
+- Phase 3.2 (A4: Establishedness) -- COMPLETE (2026-07-27)
 
-**Next**: Phase 3.2 (A4: Establishedness Analyzer)
+**Next**: Phase 3.3 (A9: Trust Profile + A10: Evidence Gap)
 
 **Next**: Phase 2.2 after Phase 2.1 review
 
@@ -63,8 +64,9 @@ are preserved in the project plan file.
 | A1 | Text Normalizer | Implemented |
 | A2 | Claim Extractor | Implemented (M1 complete) |
 | A3 | Concept Extractor | Implemented (M2 complete) |
+| A4 | Establishedness Analyzer | Implemented (Phase 3.2 done) |
 | A5 | Evidence Requirement Analyzer | Implemented (Phase 3.1 done) |
-| A4, A6-A16 | Remaining analyzers | Not started |
+| A6-A16 | Remaining analyzers | Not started |
 
 ### Tests
 
@@ -77,7 +79,8 @@ are preserved in the project plan file.
 | `tests/unit/test_a2_regression.py` | 18 | All passing |
 | `tests/unit/test_a3_concept_extractor.py` | 69 | All passing |
 | `tests/unit/test_a5_evidence_requirement.py` | 41 | All passing |
-| **Total** | **295** | **All passing** |
+| `tests/unit/test_a4_establishedness.py` | 27 | All passing |
+| **Total** | **322** | **All passing** |
 
 ### Interfaces
 
