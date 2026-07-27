@@ -356,6 +356,188 @@ def extract_works(text: str) -> list[tuple[str, int, int]]:
 
 
 # ---------------------------------------------------------------------------
+# Phase 2.2: Domain Concept Identification
+# ---------------------------------------------------------------------------
+
+# Technical term indicators -- suffixes that suggest a term is domain-specific
+_TECHNICAL_SUFFIXES: frozenset[str] = frozenset({
+    "tion", "sion", "ics", "ology", "ism", "ity", "sis", "osis",
+    "esis", "ance", "ence", "ization", "isation", "ification",
+    "metry", "nomy", "graphy", "pathy", "ation", "itive",
+    "ment", "able", "ical", "ular", "ture",
+    "ssion", "xion", "lysis", "morphism",
+})
+
+# Multi-word capitalized term pattern -- "Quantum Entanglement", "Machine Learning"
+_CAPITALIZED_TERM_PATTERN = re.compile(
+    r'\b((?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,4}))\b'
+)
+
+
+def _is_technical_term(word: str) -> bool:
+    """Check if a word has technical/domain-specific characteristics."""
+    lower = word.lower().rstrip('.,;:!?)"\'')
+    if len(lower) < 5:
+        return False
+    for suffix in _TECHNICAL_SUFFIXES:
+        if lower.endswith(suffix) and len(lower) > len(suffix) + 1:
+            return True
+    return False
+
+
+def _is_stop_word(word: str) -> bool:
+    """Check if a word is a stop word that should not be a concept."""
+    stop_words = frozenset({
+        "the", "a", "an", "this", "that", "these", "those",
+        "it", "its", "he", "she", "they", "we", "you", "i",
+        "is", "are", "was", "were", "be", "been", "being",
+        "has", "have", "had", "do", "does", "did",
+        "can", "could", "will", "would", "shall", "should",
+        "may", "might", "must", "to", "of", "in", "for", "on",
+        "with", "at", "by", "from", "as", "into", "through",
+        "during", "before", "after", "above", "below", "between",
+        "and", "but", "or", "nor", "not", "so", "yet",
+        "also", "very", "too", "just", "now", "then", "here",
+        "there", "when", "where", "why", "how", "all", "each",
+        "every", "both", "few", "more", "most", "other", "some",
+        "such", "only", "own", "same", "than", "rather",
+        "first", "second", "third", "last", "next", "several",
+        "many", "much", "one", "two", "three",
+    })
+    return word.lower().rstrip('.,;:!?)"\'') in stop_words
+
+
+def _span_overlaps_entities(
+    start: int, end: int, entities: list[tuple[str, int, int]]
+) -> bool:
+    """Check if a span overlaps with any already-extracted named entity."""
+    for _name, e_start, e_end in entities:
+        if not (end <= e_start or start >= e_end):
+            return True
+    return False
+
+
+def extract_domain_concepts(
+    text: str,
+    claims: list[Claim],
+    named_entities: list[tuple[str, int, int]],
+) -> list[tuple[str, int, int, str]]:
+    """Extract domain and common concepts beyond named entities.
+
+    Phase 2.2 heuristics:
+    - Multi-word capitalized terms → domain_concept
+    - Single technical words (with domain suffixes) → domain_concept
+    - Multi-word noun phrases referenced by multiple claims → domain_concept
+    - Other claim-referenced noun phrases → common_concept
+
+    Returns: list of (canonical_name, start_char, end_char, concept_type)
+    """
+    concepts: list[tuple[str, int, int, str]] = []
+    seen_spans: set[tuple[int, int]] = set()
+
+    # Strategy 1: Multi-word capitalized terms
+    for match in _CAPITALIZED_TERM_PATTERN.finditer(text):
+        start = match.start()
+        end = match.end()
+        span_key = (start, end)
+        if span_key in seen_spans:
+            continue
+        if _span_overlaps_entities(start, end, named_entities):
+            continue
+
+        term = match.group(0).strip()
+        words = term.split()
+        # Must be 2+ words, not just a sentence-initial capital
+        if len(words) < 2:
+            continue
+        # Check if it's referenced by at least one claim
+        if not any(
+            _claim_references_text(c, start, end) for c in claims
+        ):
+            continue
+
+        seen_spans.add(span_key)
+        concepts.append((term, start, end, "domain_concept"))
+
+    # Strategy 2: Single-word technical terms.
+    # Match words of 5+ alpha chars, then filter with _is_technical_term.
+    words = re.finditer(r'\b([A-Za-z][a-z]{4,})\b', text)
+    for match in words:
+        start = match.start()
+        end = match.end()
+        span_key = (start, end)
+        if span_key in seen_spans:
+            continue
+        if _span_overlaps_entities(start, end, named_entities):
+            continue
+
+        term = match.group(0).strip()
+        if not _is_technical_term(term):
+            continue
+        if not any(
+            _claim_references_text(c, start, end) for c in claims
+        ):
+            continue
+
+        seen_spans.add(span_key)
+        concepts.append((term, start, end, "domain_concept"))
+
+    # Strategy 3: Significant multi-word noun phrases
+    # Extract 2-3 word phrases (non-stop-word sequences) referenced by claims
+    phrase_pattern = re.compile(
+        r'\b((?:[A-Za-z][a-z]+\s+){1,2}[A-Za-z][a-z]+)\b'
+    )
+    phrase_counts: dict[tuple[str, int, int], int] = {}
+    for match in phrase_pattern.finditer(text):
+        start = match.start()
+        end = match.end()
+        span_key = (start, end)
+        if span_key in seen_spans:
+            continue
+        if _span_overlaps_entities(start, end, named_entities):
+            continue
+
+        phrase = match.group(0).strip()
+        words_in_phrase = phrase.split()
+        # Skip if any word is a stop word at the start
+        if _is_stop_word(words_in_phrase[0]):
+            continue
+        # Skip if more than half the words are stop words
+        stop_count = sum(1 for w in words_in_phrase if _is_stop_word(w))
+        if stop_count >= len(words_in_phrase) / 2:
+            continue
+        # Must be referenced by at least one claim
+        if not any(
+            _claim_references_text(c, start, end) for c in claims
+        ):
+            continue
+
+        if span_key not in phrase_counts:
+            phrase_counts[span_key] = (start, end, phrase)
+
+    # Keep phrases that have technical content and are claim-referenced.
+    # A phrase is significant if it contains technical vocabulary or is long
+    # enough to carry specific meaning (3+ content words).
+    for (start, end), (s, e, phrase) in phrase_counts.items():
+        span_key = (start, end)
+        if span_key in seen_spans:
+            continue
+        # Count how many claims reference this phrase
+        referencing_claims = sum(
+            1 for c in claims if _claim_references_text(c, start, end)
+        )
+        # Include if referenced by claims AND has technical content
+        if referencing_claims >= 1 and (
+            any(_is_technical_term(w) for w in phrase.split())
+            or len(phrase.split()) >= 3
+        ):
+            seen_spans.add(span_key)
+            concepts.append((phrase, start, end, "domain_concept"))
+
+    return concepts
+
+
+# ---------------------------------------------------------------------------
 # Concept assembly -- combining all entity types
 # ---------------------------------------------------------------------------
 
@@ -384,11 +566,23 @@ def extract_concepts(
     """
     text = normalized_text.text
 
-    # Extract all named entities
+    # Phase 2.1: Extract all named entities
     persons = extract_persons(text)
     organizations = extract_organizations(text)
     locations = extract_locations(text)
     works = extract_works(text)
+
+    # Collect named entities for overlap detection
+    named_entity_spans: list[tuple[str, int, int]] = []
+    named_entity_spans.extend(persons)
+    named_entity_spans.extend(organizations)
+    named_entity_spans.extend(locations)
+    named_entity_spans.extend(works)
+
+    # Phase 2.2: Extract domain and common concepts
+    domain_concepts = extract_domain_concepts(
+        text, claims, named_entity_spans,
+    )
 
     # Build concepts
     concepts: list[Concept] = []
@@ -433,6 +627,35 @@ def extract_concepts(
             )
             concepts.append(concept)
 
+    # Phase 2.2: Add domain concepts (already filtered by claim significance)
+    for name, start, end, concept_type in domain_concepts:
+        referencing_ids: list[str] = []
+        for claim in claims:
+            if _claim_references_text(claim, start, end):
+                referencing_ids.append(claim.id)
+
+        if not referencing_ids:
+            continue
+
+        concept_index += 1
+        surface_form = ConceptSurfaceForm(
+            text=name,
+            start_char=start,
+            end_char=end,
+        )
+
+        concept = Concept(
+            id=_make_concept_id(concept_index),
+            canonical_name=name,
+            concept_type=concept_type,
+            surface_forms=(surface_form,),
+            referencing_claim_ids=tuple(referencing_ids),
+            domain_associations={},
+            definition_provided=False,
+            definition_claim_id=None,
+        )
+        concepts.append(concept)
+
     return concepts
 
 
@@ -452,7 +675,8 @@ class ConceptExtractorAnalyzer(Analyzer):
         id="a3",
         version="0.1.0",
         responsibility="Identify significant concepts in text: named entities "
-        "(persons, organizations, locations, works) with claim-based "
+        "(persons, organizations, locations, works) and domain concepts "
+        "(technical terms, multi-word phrases) with claim-based "
         "significance filtering.",
         inputs=(
             AnalyzerInput("a1", "a1", required=True),

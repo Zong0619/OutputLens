@@ -356,3 +356,39 @@ immediately using heuristics or ML-based classification.
 analytical concerns. Deferring them to Phase 2.4 keeps Phase 2.1 focused on
 named entity recognition with correct position preservation and claim
 association. The default values are explicit and valid per the specification.
+
+---
+
+### A3-004: Multi-strategy domain concept extraction with technical suffix heuristics
+
+**Date**: 2026-07-27
+**Component**: A3 Concept Extractor -- Phase 2.2
+**Spec Reference**: Specification is silent on domain concept identification
+methodology.
+
+**Choice**: Domain concepts are identified through three complementary strategies:
+1. Multi-word capitalized terms ("Quantum Entanglement", "Machine Learning")
+2. Single-word technical terms identified by suffix patterns (words ending in
+   -tion, -ics, -ology, -ment, etc.)
+3. Multi-word noun phrases with technical content, filtered by claim significance
+
+All strategies use claim-based significance filtering and exclude spans already
+captured as named entities.
+
+**Alternatives**: An independent implementation could use:
+- TF-IDF or frequency-based key term extraction
+- An LLM to identify domain-specific terminology
+- A domain-specific ontology or knowledge base
+- Part-of-speech tagging for noun phrase extraction
+
+**Rationale**: The three-strategy approach balances precision (capitalized terms
+are highly likely to be domain concepts) with recall (technical suffix patterns
+catch single-word terms; noun phrases catch multi-word concepts regardless of
+capitalization). All strategies are deterministic and require no external
+dependencies. Claim-based filtering ensures only response-relevant terms are
+included.
+
+**Stability**: Medium. The technical suffix list and capitalization heuristics
+will evolve as evaluation reveals domain-specific patterns. The distinction
+between domain_concept and common_concept may benefit from ML-based
+classification in future versions.

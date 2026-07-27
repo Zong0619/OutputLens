@@ -1,4 +1,4 @@
-"""Tests for A3: Concept Extractor -- Phase 2.1 Named Entity Recognition."""
+"""Tests for A3: Concept Extractor -- Phase 2.1-2.2."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from outputlens.analyzers.a3_concept_extractor import (
     ConceptExtractorAnalyzer,
     _claim_references_text,
     extract_concepts,
+    extract_domain_concepts,
     extract_locations,
     extract_organizations,
     extract_persons,
@@ -490,3 +491,93 @@ class TestAIResponseScenarios:
         # "Microsoft" in both claims -> should appear once (Phase 2.3 coref),
         # or potentially twice (Phase 2.1 without coref -- surface form positions differ)
         assert len(concepts) >= 1
+
+
+# ===================================================================
+# Phase 2.2: Domain Concept Identification Tests
+# ===================================================================
+
+
+class TestExtractDomainConcepts:
+    def test_capitalized_term(self):
+        text = "Quantum Entanglement is a key phenomenon in physics.\n"
+        claims = [_make_claim("c1", text, 0, len(text))]
+        named: list = []
+        result = extract_domain_concepts(text, claims, named)
+        assert len(result) >= 1
+        names = [r[0] for r in result]
+        assert any("Quantum Entanglement" in n for n in names)
+
+    def test_technical_suffix_word(self):
+        text = "The optimization algorithm improved performance significantly.\n"
+        claims = [_make_claim("c1", text, 0, len(text))]
+        result = extract_domain_concepts(text, claims, [])
+        names = [r[0] for r in result]
+        assert any("optimization" in n.lower() for n in names)
+
+    def test_no_overlap_with_named_entities(self):
+        text = "Google developed a new Machine Learning framework.\n"
+        claims = [_make_claim("c1", text, 0, len(text))]
+        named = [("Google", 0, 6)]
+        result = extract_domain_concepts(text, claims, named)
+        names = [r[0] for r in result]
+        assert "Google" not in names
+
+    def test_domain_concept_type(self):
+        text = "Deep Learning has revolutionized artificial intelligence.\n"
+        claims = [_make_claim("c1", text, 0, len(text))]
+        result = extract_domain_concepts(text, claims, [])
+        for _, _, _, ctype in result:
+            assert ctype in ("domain_concept", "common_concept")
+
+    def test_stop_word_phrases_excluded(self):
+        text = "This is the first example of the new approach.\n"
+        claims = [_make_claim("c1", text, 0, len(text))]
+        result = extract_domain_concepts(text, claims, [])
+        names = [r[0] for r in result]
+        for phrase in names:
+            words = phrase.lower().split()
+            assert words[0] not in ("this", "is", "the", "of", "in")
+
+
+class TestExtractConceptsWithDomainConcepts:
+    """End-to-end: extract_concepts includes both named entities and domain concepts."""
+
+    def test_mixed_entities_and_domain_concepts(self):
+        text = (
+            "Researchers at Stanford University developed a new "
+            "Natural Language Processing model. The transformer architecture "
+            "improves performance significantly.\n"
+        )
+        norm = _make_norm(text)
+        claims = [
+            _make_claim("c1", text[:85], 0, 85),
+            _make_claim("c2", text[86:], 86, len(text)),
+        ]
+        concepts = extract_concepts(norm, claims)
+
+        types = {c.concept_type for c in concepts}
+        assert "named_entity_organization" in types
+        assert "domain_concept" in types
+
+    def test_physics_response(self):
+        text = (
+            "Quantum mechanics describes particle behavior at atomic scales. "
+            "Wave function collapse occurs during measurement. "
+            "Entanglement demonstrates non-local correlations.\n"
+        )
+        norm = _make_norm(text)
+        claims = [_make_claim("c1", text, 0, len(text))]
+        concepts = extract_concepts(norm, claims)
+
+        domain = [c for c in concepts if c.concept_type == "domain_concept"]
+        assert len(domain) >= 2
+
+    def test_sequential_ids_across_types(self):
+        text = "Google developed BERT. Natural Language Processing improved.\n"
+        norm = _make_norm(text)
+        claims = [_make_claim("c1", text, 0, len(text))]
+        concepts = extract_concepts(norm, claims)
+        ids = [c.id for c in concepts]
+        expected = [f"con{i}" for i in range(1, len(ids) + 1)]
+        assert ids == expected
