@@ -654,3 +654,116 @@ determination. If evaluation claimed to measure correctness, it would
 contradict Principles 2 and 17, and undermine the project's non-goals.
 
 **Stability**: High. Constitutional constraint.
+
+---
+
+### M7-001: Interface Boundary Preservation
+
+**Date**: 2026-07-27
+**Component**: M7 -- Interfaces (CLI, API, Web)
+**Spec Reference**: Principle 6 (Engine First, Interface Second), Principle 10
+(Layered Separation).
+
+**Choice**: Interfaces are rendering layers only. They may format
+AnalysisDocuments, filter displayed fields, and choose presentation order.
+They must not classify claims, modify analyzer outputs, or create new
+analytical conclusions. All analytical logic remains in the engine.
+
+**Rationale**: Preserving interface neutrality validates the Engine First
+architecture. If an interface could modify or extend analysis, the
+AnalysisDocument would no longer be the single source of analytical truth
+for that interface -- and different interfaces could produce different
+analyses from the same engine output.
+
+**Stability**: High. This is a direct application of Principles 6 and 10
+to the interface layer. Changing it would require revising both principles.
+
+---
+
+### M7-002: API Stability via AnalysisDocument Schema
+
+**Date**: 2026-07-27
+**Component**: M7 -- Public interfaces
+**Spec Reference**: Chapter 26 (AnalysisDocument Structure), Chapter 27
+(AnalysisDocument Versioning).
+
+**Choice**: Public interfaces depend only on the versioned AnalysisDocument
+schema. Internal analyzer changes (improved heuristics, better algorithms)
+do not require interface changes as long as the schema version is unchanged.
+When the schema version changes, interfaces must be updated to handle the
+new version alongside the old (within a deprecation window).
+
+**Rationale**: The AnalysisDocument schema is the compatibility boundary.
+Without this decision, every analyzer improvement could break interfaces --
+defeating the purpose of Engine First separation. By pinning compatibility
+to the schema version, analyzers can evolve independently of interfaces.
+
+**Stability**: High. This is a structural requirement for the long-term
+viability of the Engine First architecture.
+
+---
+
+### M7-003: Reference Interface Scope
+
+**Date**: 2026-07-27
+**Component**: M7 -- CLI, API, Web interfaces
+**Spec Reference**: Principle 6.
+
+**Choice**: M7 interfaces are reference implementations demonstrating engine
+usability. They are not intended to become complete production services.
+Out of scope: authentication, cloud deployment, user accounts, analytics
+tracking, production scaling.
+
+**Rationale**: OutputLens remains an open-source analytical engine, not a
+hosted application. Reference interfaces prove the engine works. Production
+interfaces are the domain of downstream integrators and community
+contributors. Limiting M7 scope prevents the project from becoming an
+application company rather than an engine project.
+
+---
+
+### M7-004: Interface Output Stability -- JSON as Machine Contract
+
+**Date**: 2026-07-27
+**Component**: M7 -- CLI and future interfaces
+**Spec Reference**: M7-002 (API Stability), Chapter 26 (AnalysisDocument).
+
+**Choice**: JSON output (`--json` flag) is the stable machine-readable
+interface. It directly serializes the AnalysisDocument per the versioned
+schema. Human-readable formatted output (`--summary`, `--claims`) may
+evolve as user expectations change without affecting compatibility.
+
+**Rationale**: Separating the machine contract (JSON AnalysisDocument)
+from presentation formats (text summaries, tables) preserves long-term
+compatibility. Downstream tools and integrations should consume JSON
+output. Human-readable formats are for direct terminal use and carry
+no compatibility guarantee.
+
+**Stability**: High for JSON output (tied to schema version). Low for
+text formatting (may evolve freely).
+
+---
+
+### M7-005: Single-Command Analysis Invocation
+
+**Date**: 2026-07-27
+**Component**: M7 -- CLI design
+**Spec Reference**: M7-001 (Interface Boundary).
+
+**Choice**: The CLI provides a single `analyze` subcommand that runs the
+full 16-analyzer pipeline. There is no mechanism to run individual
+analyzers from the CLI. Partial analysis is an API concern (Phase 7.2),
+not a CLI concern.
+
+**Rationale**: The CLI is a demonstration interface. Exposing individual
+analyzers would create interface-level analytical workflows, blurring
+the Engine First boundary. Power users who need partial analysis should
+use the API or embed the engine directly.
+
+**Stability**: Medium. A `--analyzers` flag may be added if user feedback
+demonstrates a clear need, provided it does not introduce analytical
+logic into the CLI.
+
+**Stability**: High. This is a product-boundary decision. Expanding
+interface scope would require a governance discussion about the project's
+identity.

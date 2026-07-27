@@ -13,8 +13,11 @@
 - Phase 6.3 (Benchmark Corpora) -- COMPLETE
 - Phase 6.4 (Evaluation Report + M6 Completion) -- COMPLETE
 
-**Milestone 6: Evaluation Infrastructure -- COMPLETE**. 440 tests passing.
-Next: Milestone 7 (Interfaces and Community Readiness) -- see `docs/ROADMAP.md`
+**Milestone 7: Interfaces and Community Readiness** -- IN PROGRESS
+- Phase 7.1 (CLI Interface) -- COMPLETE (accepted)
+- Phase 7.2 (REST API) -- PENDING
+
+454 tests passing. Next: Phase 7.2.
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
@@ -105,7 +108,8 @@ are preserved in the project plan file.
 | `tests/unit/test_a8_a14_a15_a16.py` | 13 | All passing |
 | `tests/unit/test_evaluation_harness.py` | 25 | All passing |
 | `tests/unit/test_benchmark_corpora.py` | 13 | All passing |
-| **Total** | **440** | **All passing** |
+| `tests/unit/test_cli_interface.py` | 14 | All passing |
+| **Total** | **454** | **All passing** |
 
 ### Interfaces
 
