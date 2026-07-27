@@ -1,6 +1,6 @@
 # OutputLens -- Project State
 
-**Last updated**: 2026-07-27 (Milestone 6 complete)
+**Last updated**: 2026-07-27 (Milestone 7 complete)
 **Purpose**: Living document. Updated continuously as the project evolves.
 
 ---
@@ -13,14 +13,11 @@
 - Phase 6.3 (Benchmark Corpora) -- COMPLETE
 - Phase 6.4 (Evaluation Report + M6 Completion) -- COMPLETE
 
-**Milestone 7: Interfaces and Community Readiness** -- IN PROGRESS
-- Phase 7.1 (CLI Interface) -- COMPLETE (accepted)
-- Phase 7.2 (REST API) -- COMPLETE (accepted)
-- Phase 7.3 (Web Demo) -- COMPLETE (accepted)
-- Phase 7.4 (README + CONTRIBUTING) -- COMPLETE (accepted)
-- Phase 7.5 (Community Documentation) -- COMPLETE (accepted)
+**Milestone 7: Interfaces and Community Readiness** -- COMPLETE (2026-07-27)
+- All 6 phases complete. 482 tests passing.
+- CLI, REST API, Web Demo, README, CONTRIBUTING, Community Docs delivered.
 
-482 tests passing. Next: Phase 7.6 (M7 Report + Completion).
+**All 7 milestones complete.** Reference implementation: v1.2.0-alpha ready.
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
