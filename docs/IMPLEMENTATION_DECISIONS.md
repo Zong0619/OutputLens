@@ -808,3 +808,25 @@ into analysis -- violating M7-001.
 
 **Stability**: High. This is a direct application of Principle 6 to the
 visualization layer.
+
+---
+
+### M7-008: Community Contribution Evolution
+
+**Date**: 2026-07-27
+**Component**: M7 -- Community Documentation (Phase 7.5)
+
+**Choice**: The contribution workflow should evolve through documented
+evidence from actual community usage rather than preemptive governance
+design. The initial workflow covers known contribution patterns (analyzers,
+interfaces, evaluation, documentation). New patterns that emerge from
+community practice should be incorporated into the documentation as they
+are observed, not anticipated.
+
+**Rationale**: Designing governance for contribution patterns that don't
+yet exist creates unnecessary process overhead and risks designing the
+wrong process. The project should remain open to community-driven
+evolution of its contribution model.
+
+**Stability**: Medium. This is a process decision, not an architectural
+one. It will naturally evolve as the community grows.
