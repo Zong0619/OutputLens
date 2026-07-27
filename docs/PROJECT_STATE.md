@@ -16,8 +16,9 @@
 **Milestone 7: Interfaces and Community Readiness** -- IN PROGRESS
 - Phase 7.1 (CLI Interface) -- COMPLETE (accepted)
 - Phase 7.2 (REST API) -- COMPLETE (accepted)
+- Phase 7.3 (Web Demo) -- COMPLETE (accepted)
 
-468 tests passing. Next: Phase 7.3 (Web Demo).
+475 tests passing. Next: Phase 7.4 (README + CONTRIBUTING).
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
@@ -110,7 +111,8 @@ are preserved in the project plan file.
 | `tests/unit/test_benchmark_corpora.py` | 13 | All passing |
 | `tests/unit/test_cli_interface.py` | 14 | All passing |
 | `tests/unit/test_api_interface.py` | 14 | All passing |
-| **Total** | **468** | **All passing** |
+| `tests/unit/test_web_demo.py` | 7 | All passing |
+| **Total** | **475** | **All passing** |
 
 ### Interfaces
 

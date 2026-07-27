@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OutputLens -- AI Output Analysis Demo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>OutputLens</h1>
+  <p class="tagline">See what your AI isn't telling you.</p>
+  <p class="caveat">OutputLens analyzes epistemological characteristics.
+  It does not determine truth or falsehood.</p>
+</header>
+
+<main>
+  <section class="input-section">
+    <textarea id="text-input" placeholder="Paste an AI-generated response here..."
+              rows="8"></textarea>
+    <div class="input-options">
+      <input type="text" id="prompt-input" placeholder="Prompt (optional)">
+      <input type="text" id="model-input" placeholder="Model (optional)">
+    </div>
+    <button id="analyze-btn">Analyze</button>
+    <p id="error-msg" class="error hidden"></p>
+  </section>
+
+  <section id="results" class="hidden">
+    <div id="trust-profile" class="card">
+      <h2>Trust Profile</h2>
+      <div class="bar-container">
+        <div class="bar-row">
+          <span class="bar-label">Established</span>
+          <div class="bar-track"><div id="bar-established" class="bar-fill bar-green"></div></div>
+          <span id="pct-established" class="bar-pct">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Plausible</span>
+          <div class="bar-track"><div id="bar-plausible" class="bar-fill bar-yellow"></div></div>
+          <span id="pct-plausible" class="bar-pct">0%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Needs Verification</span>
+          <div class="bar-track"><div id="bar-verify" class="bar-fill bar-red"></div></div>
+          <span id="pct-verify" class="bar-pct">0%</span>
+        </div>
+      </div>
+      <p class="caveat">This is not a reliability score. Different contexts need different standards.</p>
+    </div>
+
+    <div id="claims-section" class="card">
+      <h2>Claims</h2>
+      <p id="claims-count"></p>
+      <div id="claims-list"></div>
+    </div>
+
+    <div id="punchlist-section" class="card">
+      <h2>Claims to Investigate</h2>
+      <p id="punchlist-severity"></p>
+      <div id="punchlist-list"></div>
+    </div>
+
+    <div id="narrative-section" class="card">
+      <h2>Summary</h2>
+      <p id="narrative-text"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>OutputLens v0.1.0 -- Open source (Apache 2.0) -- Reference demonstration</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

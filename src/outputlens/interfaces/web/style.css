@@ -1,0 +1,138 @@
+/* OutputLens Web Demo -- Reference demonstration styles. */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #333;
+  background: #fafafa;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+header h1 { font-size: 2em; margin-bottom: 4px; color: #1a1a2e; }
+.tagline { font-size: 1.1em; color: #555; margin: 4px 0; }
+.caveat { font-size: 0.8em; color: #888; font-style: italic; margin-top: 6px; }
+
+.input-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+}
+.input-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.input-options input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+button {
+  margin-top: 12px;
+  padding: 10px 32px;
+  background: #1a1a2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.6; cursor: default; }
+.error { color: #c00; margin-top: 8px; font-size: 14px; }
+.hidden { display: none; }
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 16px;
+}
+.card h2 {
+  margin-top: 0;
+  font-size: 1.2em;
+  color: #1a1a2e;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+/* Trust Profile bars */
+.bar-row {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+.bar-label { width: 150px; font-size: 14px; }
+.bar-track {
+  flex: 1;
+  height: 20px;
+  background: #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 10px;
+}
+.bar-fill { height: 100%; border-radius: 10px; transition: width 0.3s; }
+.bar-green { background: #2e7d32; }
+.bar-yellow { background: #e6a817; }
+.bar-red { background: #c62828; }
+.bar-pct { width: 50px; text-align: right; font-size: 14px; font-weight: 600; }
+
+/* Claims table */
+.claims-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.claims-table th, .claims-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+.claims-table th { background: #f5f5f5; font-weight: 600; }
+.level { font-weight: 600; font-size: 12px; }
+
+/* Punchlist */
+.punchlist { padding-left: 20px; }
+.punchlist li { margin-bottom: 16px; }
+.pl-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.pl-rank { font-weight: 700; font-size: 14px; color: #1a1a2e; }
+.pl-trigger {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.tag-no_evidence { background: #ffcdd2; color: #c62828; }
+.tag-novel_claim { background: #e1bee7; color: #6a1b9a; }
+.tag-overconfident { background: #fff3e0; color: #e65100; }
+.tag-foundational { background: #b3e5fc; color: #01579b; }
+.tag-contradicted { background: #ffcdd2; color: #b71c1c; }
+.tag-orphaned { background: #e0e0e0; color: #424242; }
+.pl-claim { margin: 4px 0; font-style: italic; color: #555; }
+.pl-verification { font-size: 13px; color: #666; }
+
+footer {
+  text-align: center;
+  margin-top: 30px;
+  font-size: 12px;
+  color: #999;
+}

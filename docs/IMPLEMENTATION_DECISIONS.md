@@ -784,3 +784,27 @@ OutputLens remains an analytical engine, not a hosted service.
 
 **Stability**: High. This is a product-boundary decision derived from
 M7-003.
+
+---
+
+### M7-007: Visualization Evolution Must Preserve Rendering Boundary
+
+**Date**: 2026-07-27
+**Component**: M7 -- Web Demo (Phase 7.3)
+**Spec Reference**: M7-001 (Interface Boundary), Principle 6 (Engine First).
+
+**Choice**: Future visual improvements to interfaces (annotated text
+highlighting, interactive graphs, rich formatting) must continue consuming
+existing AnalysisDocument fields without creating new analytical semantics.
+Visualization enhancements are rendering improvements, not analytical
+extensions.
+
+**Rationale**: Keeping visualization separate from analysis preserves
+interface interchangeability. If the web demo interprets a classification
+level as a visual color independently, changing the color mapping should
+not require engine changes. Conversely, if a visualization computes a new
+score from classification data, it has crossed the rendering boundary
+into analysis -- violating M7-001.
+
+**Stability**: High. This is a direct application of Principle 6 to the
+visualization layer.

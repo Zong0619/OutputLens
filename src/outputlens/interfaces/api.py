@@ -71,6 +71,22 @@ def create_app() -> Any:
         except Exception as e:
             return jsonify({"error": f"Analysis failed: {e}"}), 500
 
+    # Serve the web demo at the root path
+    import os
+    web_dir = os.path.join(os.path.dirname(__file__), "web")
+
+    @app.route("/")
+    def index():
+        return __import__("flask").send_from_directory(web_dir, "index.html")
+
+    @app.route("/<path:filename>")
+    def static_files(filename):
+        from flask import send_from_directory
+        path = os.path.join(web_dir, filename)
+        if os.path.isfile(path):
+            return send_from_directory(web_dir, filename)
+        return jsonify({"error": "Not found"}), 404
+
     # CORS support for web demo
     @app.after_request
     def add_cors_headers(response):
