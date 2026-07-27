@@ -7,7 +7,7 @@
 
 ## Current Milestone
 
-**Milestone 6: Evaluation Infrastructure** -- IN PROGRESS (Phase 6.1)
+**Milestone 6: Evaluation Infrastructure** -- IN PROGRESS (Phase 6.2 complete)
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
@@ -96,7 +96,8 @@ are preserved in the project plan file.
 | `tests/unit/test_a9_a10_synthesis.py` | 15 | All passing |
 | `tests/unit/test_a11_a12_a13_synthesis.py` | 9 | All passing |
 | `tests/unit/test_a8_a14_a15_a16.py` | 13 | All passing |
-| **Total** | **402** | **All passing** |
+| `tests/unit/test_evaluation_harness.py` | 25 | All passing |
+| **Total** | **427** | **All passing** |
 
 ### Interfaces
 
