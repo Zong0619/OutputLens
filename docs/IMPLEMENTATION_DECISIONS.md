@@ -414,3 +414,33 @@ Conservative: false negatives preferred over false positives.
 
 **Stability**: Low. Role mapping and pronoun heuristics will expand with
 evaluation. Cross-paragraph coref is a known limitation.
+
+---
+
+### A5-001: Pattern-based evidence requirement classification with signal detection
+
+**Date**: 2026-07-27
+**Component**: A5 Evidence Requirement Analyzer (`src/outputlens/analyzers/a5_evidence_requirement.py`)
+**Spec Reference**: Chapter 13 (A5: Evidence Requirement Analyzer).
+
+**Choice**: Four-level classification (R1-R4) using explicit signal detection:
+- R1: Definitional structure, tautologies, normative claims, meta-claims
+- R2: Citation patterns (et al., brackets, parenthetical), source mentions
+  (published in, study by), known publication venues
+- R3: Evidence gestures without specifics (studies show, research indicates,
+  experts agree, it is known that)
+- R4: Specific unsupported claims (statistics, attributions, causal claims)
+  and default for factual assertions without detected signals
+Classification follows a priority order: R2 > R1 > R3 > R4. R3 escalates to
+R4 when combined with specific-statistic signals.
+
+**Alternatives**: An independent implementation could use an LLM to judge
+evidence presence, or a more sophisticated NLP pipeline.
+
+**Rationale**: Evidence requirement is the most tractable classification axis.
+Citation patterns, evidence gestures, and statistical claims are detectable
+through surface-level text patterns. Signal-based classification produces
+reasoning that explains WHAT was detected, not just the assigned level.
+
+**Stability**: Medium. Pattern lists will expand with evaluation. The R3/R4
+boundary (gesture + specific → R4) is a heuristic that may need tuning.
