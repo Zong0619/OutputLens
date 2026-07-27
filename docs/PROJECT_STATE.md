@@ -17,8 +17,9 @@
 - Phase 7.1 (CLI Interface) -- COMPLETE (accepted)
 - Phase 7.2 (REST API) -- COMPLETE (accepted)
 - Phase 7.3 (Web Demo) -- COMPLETE (accepted)
+- Phase 7.4 (README + CONTRIBUTING) -- COMPLETE
 
-475 tests passing. Next: Phase 7.4 (README + CONTRIBUTING).
+475 tests passing. Next: Phase 7.5 (M7 Report + Completion).
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
