@@ -1,0 +1,50 @@
+{
+  "corpus_id": "BENCH-TEMPORAL",
+  "version": "0.1.0",
+  "description": "Immutable regression corpus for cross-version analyzer comparison.",
+  "mutability": "immutable",
+  "immutability_policy": "Items are never modified or removed. Deprecation only via manifest flag.",
+  "total_items": 5,
+  "items": [
+    {
+      "item_id": "tmp_001",
+      "file": "items/tmp_001.json",
+      "domain": "science",
+      "word_count": 80,
+      "added_version": "0.1.0",
+      "deprecated": false
+    },
+    {
+      "item_id": "tmp_002",
+      "file": "items/tmp_002.json",
+      "domain": "technology",
+      "word_count": 95,
+      "added_version": "0.1.0",
+      "deprecated": false
+    },
+    {
+      "item_id": "tmp_003",
+      "file": "items/tmp_003.json",
+      "domain": "history",
+      "word_count": 70,
+      "added_version": "0.1.0",
+      "deprecated": false
+    },
+    {
+      "item_id": "tmp_004",
+      "file": "items/tmp_004.json",
+      "domain": "general",
+      "word_count": 60,
+      "added_version": "0.1.0",
+      "deprecated": false
+    },
+    {
+      "item_id": "tmp_005",
+      "file": "items/tmp_005.json",
+      "domain": "medicine",
+      "word_count": 85,
+      "added_version": "0.1.0",
+      "deprecated": false
+    }
+  ]
+}

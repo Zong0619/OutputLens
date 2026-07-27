@@ -1,0 +1,70 @@
+{
+  "corpus_id": "BENCH-CHALLENGE",
+  "version": "0.1.0",
+  "description": "Curated difficult cases for stress-testing analyzers.",
+  "mutability": "appendable",
+  "total_items": 8,
+  "challenge_patterns_covered": [
+    "high_claim_density", "hedging_heavy", "self_contradiction",
+    "domain_mixing", "code_prose_mix", "nested_structure",
+    "undefined_terms", "list_heavy"
+  ],
+  "items": [
+    {
+      "item_id": "ch_001",
+      "file": "items/ch_001.json",
+      "primary_pattern": "high_claim_density",
+      "secondary_patterns": ["nested_structure"],
+      "notes": "Single sentence containing multiple independent propositions with nested clauses."
+    },
+    {
+      "item_id": "ch_002",
+      "file": "items/ch_002.json",
+      "primary_pattern": "hedging_heavy",
+      "secondary_patterns": [],
+      "notes": "Response dominated by uncertainty language. Tests confidence marker detection and E-level assignment."
+    },
+    {
+      "item_id": "ch_003",
+      "file": "items/ch_003.json",
+      "primary_pattern": "self_contradiction",
+      "secondary_patterns": [],
+      "notes": "Response makes two claims that cannot both be true. Tests A7 contradiction detection."
+    },
+    {
+      "item_id": "ch_004",
+      "file": "items/ch_004.json",
+      "primary_pattern": "domain_mixing",
+      "secondary_patterns": ["undefined_terms"],
+      "notes": "Moves from physics to philosophy without clear transitions. Tests domain association."
+    },
+    {
+      "item_id": "ch_005",
+      "file": "items/ch_005.json",
+      "primary_pattern": "code_prose_mix",
+      "secondary_patterns": [],
+      "notes": "Code blocks interspersed with explanatory prose. Tests claim boundary detection."
+    },
+    {
+      "item_id": "ch_006",
+      "file": "items/ch_006.json",
+      "primary_pattern": "nested_structure",
+      "secondary_patterns": ["high_claim_density"],
+      "notes": "Deeply nested clauses with multiple levels of qualification and hedging."
+    },
+    {
+      "item_id": "ch_007",
+      "file": "items/ch_007.json",
+      "primary_pattern": "undefined_terms",
+      "secondary_patterns": [],
+      "notes": "Uses specialized jargon without definitions. Tests concept extraction and E5/N5 defaults."
+    },
+    {
+      "item_id": "ch_008",
+      "file": "items/ch_008.json",
+      "primary_pattern": "list_heavy",
+      "secondary_patterns": ["domain_mixing"],
+      "notes": "Heavily structured response with bullet points and numbered lists across topics."
+    }
+  ]
+}

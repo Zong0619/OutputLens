@@ -1,0 +1,103 @@
+{
+  "corpus_id": "BENCH-DIVERSITY",
+  "version": "0.1.0",
+  "description": "Diverse AI responses for consistency and distribution analysis.",
+  "mutability": "appendable",
+  "total_items": 10,
+  "domains_covered": [
+    "science", "technology", "medicine", "law", "history",
+    "economics", "philosophy", "arts", "current_events", "general"
+  ],
+  "items": [
+    {
+      "item_id": "div_001",
+      "file": "items/div_001.json",
+      "domain": "science",
+      "source_model": "example",
+      "word_count": 180,
+      "claim_density_estimate": "medium",
+      "response_style": "explanatory"
+    },
+    {
+      "item_id": "div_002",
+      "file": "items/div_002.json",
+      "domain": "technology",
+      "source_model": "example",
+      "word_count": 120,
+      "claim_density_estimate": "high",
+      "response_style": "technical"
+    },
+    {
+      "item_id": "div_003",
+      "file": "items/div_003.json",
+      "domain": "medicine",
+      "source_model": "example",
+      "word_count": 200,
+      "claim_density_estimate": "medium",
+      "response_style": "explanatory"
+    },
+    {
+      "item_id": "div_004",
+      "file": "items/div_004.json",
+      "domain": "law",
+      "source_model": "example",
+      "word_count": 160,
+      "claim_density_estimate": "high",
+      "response_style": "argumentative"
+    },
+    {
+      "item_id": "div_005",
+      "file": "items/div_005.json",
+      "domain": "history",
+      "source_model": "example",
+      "word_count": 140,
+      "claim_density_estimate": "medium",
+      "response_style": "narrative"
+    },
+    {
+      "item_id": "div_006",
+      "file": "items/div_006.json",
+      "domain": "economics",
+      "source_model": "example",
+      "word_count": 170,
+      "claim_density_estimate": "medium",
+      "response_style": "explanatory"
+    },
+    {
+      "item_id": "div_007",
+      "file": "items/div_007.json",
+      "domain": "philosophy",
+      "source_model": "example",
+      "word_count": 150,
+      "claim_density_estimate": "low",
+      "response_style": "argumentative"
+    },
+    {
+      "item_id": "div_008",
+      "file": "items/div_008.json",
+      "domain": "arts",
+      "source_model": "example",
+      "word_count": 130,
+      "claim_density_estimate": "low",
+      "response_style": "narrative"
+    },
+    {
+      "item_id": "div_009",
+      "file": "items/div_009.json",
+      "domain": "current_events",
+      "source_model": "example",
+      "word_count": 190,
+      "claim_density_estimate": "high",
+      "response_style": "conversational"
+    },
+    {
+      "item_id": "div_010",
+      "file": "items/div_010.json",
+      "domain": "general",
+      "source_model": "example",
+      "word_count": 100,
+      "claim_density_estimate": "low",
+      "response_style": "conversational"
+    }
+  ]
+}

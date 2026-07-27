@@ -1,0 +1,11 @@
+{
+  "item_id": "tmp_001",
+  "domain": "science",
+  "source_model": "example",
+  "response_text": "Water freezes at 0 degrees Celsius at standard atmospheric pressure. The freezing point can be lowered by adding solutes such as salt, a phenomenon known as freezing point depression. This property is widely used in applications ranging from de-icing roads to making ice cream.",
+  "prompt": "What is the freezing point of water?",
+  "word_count": 48,
+  "claim_density_estimate": "medium",
+  "added_date": "2026-07-27",
+  "notes": "Baseline science response with established facts. Tests classification stability."
+}

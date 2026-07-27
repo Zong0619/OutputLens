@@ -7,7 +7,12 @@
 
 ## Current Milestone
 
-**Milestone 6: Evaluation Infrastructure** -- IN PROGRESS (Phase 6.2 complete)
+**Milestone 6: Evaluation Infrastructure** -- IN PROGRESS
+- Phase 6.1 (Golden Dataset Foundation) -- COMPLETE
+- Phase 6.2 (Evaluation Harness) -- COMPLETE
+- Phase 6.3 (Benchmark Corpora) -- COMPLETE
+
+**Next**: Phase 6.3 (BENCH-DIVERSITY, BENCH-CHALLENGE, BENCH-TEMPORAL)
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
@@ -97,7 +102,8 @@ are preserved in the project plan file.
 | `tests/unit/test_a11_a12_a13_synthesis.py` | 9 | All passing |
 | `tests/unit/test_a8_a14_a15_a16.py` | 13 | All passing |
 | `tests/unit/test_evaluation_harness.py` | 25 | All passing |
-| **Total** | **427** | **All passing** |
+| `tests/unit/test_benchmark_corpora.py` | 13 | All passing |
+| **Total** | **440** | **All passing** |
 
 ### Interfaces
 

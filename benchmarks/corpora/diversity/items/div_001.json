@@ -1,0 +1,12 @@
+{
+  "item_id": "div_001",
+  "domain": "science",
+  "source_model": "example",
+  "response_text": "Quantum entanglement is a physical phenomenon that occurs when a group of particles are generated, interact, or share spatial proximity in a way such that the quantum state of each particle cannot be described independently of the state of the others. Instead, a quantum state must be described for the system as a whole. Albert Einstein famously called this 'spooky action at a distance.' Entanglement is a key resource for quantum computing and quantum cryptography. When two particles are entangled, measuring one instantly determines the state of the other, regardless of the distance between them. This does not allow faster-than-light communication, but it does enable quantum teleportation and superdense coding. The phenomenon has been experimentally verified many times, beginning with the Aspect experiments in the 1980s.",
+  "prompt": "Explain quantum entanglement in simple terms.",
+  "word_count": 140,
+  "claim_density_estimate": "medium",
+  "response_style": "explanatory",
+  "added_date": "2026-07-27",
+  "notes": "Representative science explanation with citations, attribution, and domain terminology."
+}
