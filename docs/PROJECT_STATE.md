@@ -1,24 +1,17 @@
 # OutputLens -- Project State
 
-**Last updated**: 2026-07-27 (Milestone 1 complete)
+**Last updated**: 2026-07-27 (Milestone 3 complete)
 **Purpose**: Living document. Updated continuously as the project evolves.
 
 ---
 
 ## Current Milestone
 
-**Milestone 2: Concept Extraction** -- COMPLETE (2026-07-27)
-- All 5 phases complete. 69 A3 tests + 185 existing = 254 total passing.
+**Milestone 3: Classification** -- COMPLETE (2026-07-27)
+- A4, A5, A9, A10 implemented. 337 tests passing.
+- Full A1→A2→A3→{A4,A5}→{A9,A10} pipeline validated.
 
-**Milestone 3: Classification** -- IN PROGRESS
-- Phase 3.1 (A5: Evidence Requirement) -- COMPLETE (2026-07-27)
-- Phase 3.2 (A4: Establishedness) -- COMPLETE (2026-07-27)
-- Phase 3.3 (A9: Trust Profile + A10: Evidence Gap) -- COMPLETE (2026-07-27)
-- Phase 3.4 (Integration, Evaluation, Documentation) -- COMPLETE (2026-07-27)
-
-**Milestone 3: Classification -- COMPLETE**. Next: Milestone 4 (A6/A7/A11-A13).
-
-**Next**: Phase 2.2 after Phase 2.1 review
+**Next**: Milestone 4 (A6, A7, A11, A12, A13) -- see `docs/ROADMAP.md`
 
 ## Completed Milestones
 

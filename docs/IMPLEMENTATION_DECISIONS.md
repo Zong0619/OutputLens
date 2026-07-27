@@ -442,5 +442,139 @@ Citation patterns, evidence gestures, and statistical claims are detectable
 through surface-level text patterns. Signal-based classification produces
 reasoning that explains WHAT was detected, not just the assigned level.
 
-**Stability**: Medium. Pattern lists will expand with evaluation. The R3/R4
-boundary (gesture + specific → R4) is a heuristic that may need tuning.
+---
+
+### A4/A5-001: Knowledge Boundary -- Core Analyzers Must Remain Knowledge-Agnostic
+
+**Date**: 2026-07-27
+**Component**: A4 (Establishedness Analyzer), A5 (Evidence Requirement Analyzer)
+**Spec Reference**: Principles 2 (Lens, Not Verdict), 3 (Model Agnostic), 17
+(No Truth Determination), 19 (Domain-Agnostic Core).
+
+**Choice**: The core classification analyzers (A4, A5) intentionally operate
+without external knowledge sources. They classify claims based on observable
+signals present in the text and analysis context -- claim types, concept domain
+associations, linguistic hedging/certainty patterns, citation presence, and
+specificity markers. They do not consult fact databases, knowledge graphs,
+search engines, or external truth sources.
+
+When signals are insufficient to make a confident classification, the analyzers
+default to conservative levels (E3 for establishedness, R4 for evidence
+requirement) rather than guessing or deferring to an external authority.
+
+**Alternatives considered and rejected**:
+- **External knowledge base**: Would improve classification of common knowledge
+  claims (e.g., "Water freezes at 0°C" → E1 instead of E3). Rejected because it
+  would make the analyzer dependent on a curated knowledge source, introduce
+  maintenance burden, and blur the boundary between epistemological
+  classification and fact verification.
+- **LLM-based classification**: Would improve accuracy across all levels.
+  Rejected for core analyzers because it would violate model agnosticism
+  (Principle 3) at the implementation level, introduce non-determinism, and
+  create dependency on external API services.
+- **Web search integration**: Would enable real-time evidence verification.
+  Rejected because it would transform OutputLens from an analysis tool into a
+  fact-checking system, violating Principles 2 and 17.
+
+**Future extension policy**: External knowledge sources may be introduced as
+optional extensions in v3+ (e.g., domain profiles, knowledge layer plugins).
+Such extensions MUST:
+1. Be opt-in -- the core analyzers function without them.
+2. Not modify the core analyzer behavior or output contracts.
+3. Produce their own annotations rather than altering existing classifications.
+4. Clearly distinguish their output from core epistemological classification.
+5. Never assert truth or falsehood.
+
+This preserves the OutputLens boundary: the system classifies epistemological
+characteristics of claims; it does not determine what is true.
+
+**Rationale**: This is the single most important boundary decision in
+OutputLens. It preserves:
+- **Epistemological humility** (Principle 2): Classifications are lenses, not
+  verdicts. A low-establishedness classification means "the analyzer cannot
+  confirm this is established knowledge," not "this claim is false."
+- **Reader empowerment** (Principle 4): The reader, not the tool, decides what
+  to believe. Adding external truth sources would shift this responsibility.
+- **Non-goal integrity**: OutputLens is explicitly not a fact checker,
+  hallucination detector, or truth verification system. External knowledge
+  sources would erode all three non-goals.
+- **Open-source viability**: An analysis engine that requires a maintained
+  knowledge base is harder to fork, audit, and deploy independently.
+- **Determinism**: Observable text signals produce consistent output. External
+  knowledge sources (especially LLMs and web search) introduce variability.
+
+**Stability**: High. This is a constitutional constraint. Changing it would
+require revising Principles 2, 3, and 17, and redefining the project's
+non-goals -- a governance-level decision.
+
+---
+
+### A6-001: Novelty Without External Knowledge
+
+**Date**: 2026-07-27
+**Component**: A6 (Novelty Analyzer) -- Milestone 4 planning
+**Spec Reference**: Principles 2, 3, 17, 19; A4/A5-001 knowledge boundary.
+
+**Choice**: The core A6 Novelty Analyzer evaluates novelty indicators from
+observable text signals only. It uses A3 concept types (novel_construct flag),
+claim type signals, specificity patterns, established framing markers, and
+textual comparison signals within the analyzed response. It does not query
+external knowledge bases, search prior literature, determine whether an idea
+has appeared before, or claim that a concept is objectively novel.
+
+Novelty classifications represent heuristic indicators, not verified novelty
+judgments. The N1-N5 scale describes how the claim relates to what is
+observably presented as established knowledge within the text itself.
+
+**Alternatives considered and rejected**: Literature search, knowledge base
+comparison, prior art databases -- all would move A6 toward novelty
+verification, violating the knowledge boundary.
+
+**Future extension policy**: Same as A4/A5-001. Optional knowledge-based
+novelty analysis may be added as an extension in v3+ without modifying the
+core A6 contract.
+
+**Rationale**: Objective novelty detection requires external knowledge.
+Maintaining the knowledge boundary preserves the OutputLens principle that
+the system classifies epistemological characteristics rather than determining
+external reality.
+
+**Stability**: High. This is a constitutional constraint derived from
+A4/A5-001.
+
+---
+
+### A7-001: Discourse Contrast vs Logical Contradiction
+
+**Date**: 2026-07-27
+**Component**: A7 (Claim Relationship Mapper) -- Milestone 4 planning
+**Spec Reference**: Chapter 14 (A7). Specification defines relationship types
+but is silent on detection methodology.
+
+**Choice**: The initial A7 implementation uses conservative relationship
+mapping. Discourse markers such as "however," "but," "although," and "on the
+other hand" indicate contrast or qualification, not automatically logical
+contradiction. The implementation distinguishes:
+- **contradicts**: Claims that cannot both be true (direct negation, mutually
+  exclusive assertions).
+- **concedes**: Acknowledgment of limitations or counterpoints.
+- **elaborates**: Additional detail or examples.
+- **supports**: Premises, reasons, or evidence for another claim.
+- **depends_on**: Logical prerequisite relationships.
+
+Explicit contrast markers map to `concedes` by default, not `contradicts`.
+Contradiction detection requires stronger signals: direct negation patterns,
+mutually exclusive predicates, or explicit disagreement language.
+
+**Alternatives**: Automatic mapping of all contrast markers to contradiction
+(too aggressive -- creates false structural conflicts). Full semantic
+contradiction detection (requires NLP beyond Phase 4.2 scope).
+
+**Rationale**: Conservative relationship mapping prioritizes precision over
+recall. False contradiction detection is more harmful to structural integrity
+analysis than missing some implicit contradictions. Over-claiming
+contradictions would mislead the reader and undermine trust in the analysis.
+
+**Stability**: Medium. Relationship detection will improve as evaluation
+reveals patterns. The contrast-vs-contradiction distinction is a permanent
+design choice.
