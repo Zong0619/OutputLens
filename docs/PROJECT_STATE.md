@@ -7,15 +7,11 @@
 
 ## Current Milestone
 
-**Milestone 1: Claim Extraction** -- COMPLETE (2026-07-27)
-- Phase 1.1 (Basic Claim Infrastructure) -- COMPLETE
-- Phase 1.2 (Atomic Claim Extraction) -- COMPLETE
-- Phase 1.3 (Compound Sentence Handling) -- COMPLETE
-- Phase 1.4 (Lists and Enumerations) -- COMPLETE
-- Phase 1.5 (Relative Clauses and Nested Structures) -- COMPLETE
-- Phase 1.6 (Evaluation Infrastructure) -- COMPLETE
+**Milestone 2: Concept Extraction** -- IN PROGRESS
+- Phase 2.1 (Named Entity Recognition) -- COMPLETE (2026-07-27)
+- Phase 2.2 (Domain Concept Identification) -- PENDING
 
-**Next**: Milestone 2 (A3: Concept Extractor) -- see `docs/ROADMAP.md`
+**Next**: Phase 2.2 after Phase 2.1 review
 
 ## Completed Milestones
 
@@ -62,7 +58,8 @@ are preserved in the project plan file.
 |---|---|---|
 | A1 | Text Normalizer | Implemented |
 | A2 | Claim Extractor | Implemented (M1 complete) |
-| A3-A16 | All remaining analyzers | Not started |
+| A3 | Concept Extractor | Phase 2.1 done (named entities) |
+| A4-A16 | All remaining analyzers | Not started |
 
 ### Tests
 
@@ -73,7 +70,8 @@ are preserved in the project plan file.
 | `tests/unit/test_orchestration.py` | 25 | All passing |
 | `tests/unit/test_a2_claim_extractor.py` | 86 | All passing |
 | `tests/unit/test_a2_regression.py` | 18 | All passing |
-| **Total** | **185** | **All passing** |
+| `tests/unit/test_a3_concept_extractor.py` | 48 | All passing |
+| **Total** | **233** | **All passing** |
 
 ### Interfaces
 

@@ -274,3 +274,85 @@ are introduced.
 
 **Stability**: Medium. These patterns will evolve as the golden dataset
 reveals additional false positive/negative patterns.
+
+---
+
+### A3-001: Rule-based named entity recognition with curated lists
+
+**Date**: 2026-07-27
+**Component**: A3 Concept Extractor -- Phase 2.1 (`src/outputlens/analyzers/a3_concept_extractor.py`)
+**Spec Reference**: Chapter 12 (A3: Concept Extractor). Specification is silent on
+extraction methodology.
+
+**Choice**: The reference implementation uses deterministic pattern matching
+with curated entity lists. Person names: title-prefix, particle-aware, initials,
+and general capitalized patterns with organization/location exclusion.
+Organizations: suffix-based pattern + known-org lookup. Locations: curated list
+of ~140 countries, cities, and US states. Works: quoted title extraction with
+minimum-length heuristics.
+
+**Alternatives**: An independent implementation could use:
+- spaCy/NLTK for named entity recognition
+- An LLM-based extractor
+- A transformer-based NER model
+- Different entity type taxonomies
+
+**Rationale**: A rule-based approach preserves determinism and zero external
+dependencies. Curated lists for locations and known organizations provide high
+precision for common cases. Pattern-based person/organization extraction covers
+the most common structures in AI-generated text. The approach is intentionally
+conservative -- false negatives (missed entities) are preferred over false
+positives (non-entities classified as entities).
+
+**Stability**: Medium. Entity lists will expand. Phase 2.3 (coreference) and
+Phase 2.2 (domain concepts) will augment the concept index with additional
+concept types.
+
+---
+
+### A3-002: Claim-based significance filtering
+
+**Date**: 2026-07-27
+**Component**: A3 Concept Extractor -- `_claim_references_text` / `extract_concepts`
+**Spec Reference**: Chapter 12 (A3). Specification requires significance filtering
+but does not define the mechanism.
+
+**Choice**: A named entity is included as a Concept only if at least one Claim
+references it (position-based overlap detection). Entities that appear in the
+text but are not the subject/object of any claim are excluded.
+
+**Alternatives**: An independent implementation could use:
+- Frequency-based filtering (entities mentioned N+ times are significant)
+- Grammatical role filtering (only subjects/objects are significant)
+- Domain relevance scoring
+- No filtering (all entities are concepts)
+
+**Rationale**: Claim-based filtering operationalizes the specification's
+"significance" requirement without requiring syntactic parsing. A concept is
+significant if the response makes claims ABOUT it. This is a conservative filter
+that errs toward inclusion (an entity mentioned in a claim might be peripheral,
+but at least it's relevant to something the response asserts).
+
+**Stability**: Medium. The heuristic may be refined when evaluation reveals
+whether it over-includes or under-includes concepts.
+
+---
+
+### A3-003: All concepts default to empty domain_associations and definition_provided=False
+
+**Date**: 2026-07-27
+**Component**: A3 Concept Extractor -- Phase 2.1
+**Spec Reference**: Specification defines `domain_associations` and
+`definition_provided` fields but does not mandate how they are populated.
+
+**Choice**: In Phase 2.1, `domain_associations` defaults to `{}` (empty dict)
+and `definition_provided` defaults to `False` for all concepts. These fields
+will be populated in Phase 2.4 (Domain Association and Definition Detection).
+
+**Alternatives**: An independent implementation could populate these fields
+immediately using heuristics or ML-based classification.
+
+**Rationale**: Domain association and definition detection are separate
+analytical concerns. Deferring them to Phase 2.4 keeps Phase 2.1 focused on
+named entity recognition with correct position preservation and claim
+association. The default values are explicit and valid per the specification.
