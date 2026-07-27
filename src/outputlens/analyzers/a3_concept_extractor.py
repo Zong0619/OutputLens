@@ -656,7 +656,421 @@ def extract_concepts(
         )
         concepts.append(concept)
 
+    # Phase 2.3: Resolve coreferences (pronouns, definite NPs)
+    concepts = _resolve_coreferences(concepts, text)
+
+    # Phase 2.4: Domain association and definition detection
+    concepts = _associate_domains(concepts)
+    concepts = _detect_definitions(concepts, claims)
+
     return concepts
+
+
+# ---------------------------------------------------------------------------
+# Phase 2.3: Coreference Resolution
+# ---------------------------------------------------------------------------
+
+# Third-person pronouns and their gender/number categories
+_PRONOUNS_MASCULINE: frozenset[str] = frozenset({"he", "him", "his"})
+_PRONOUNS_FEMININE: frozenset[str] = frozenset({"she", "her", "hers"})
+_PRONOUNS_NEUTRAL: frozenset[str] = frozenset({"it", "its"})
+_PRONOUNS_PLURAL: frozenset[str] = frozenset({"they", "them", "their", "theirs"})
+_ALL_PRONOUNS: frozenset[str] = (
+    _PRONOUNS_MASCULINE | _PRONOUNS_FEMININE | _PRONOUNS_NEUTRAL | _PRONOUNS_PLURAL
+)
+
+# Pronoun regex -- matches third-person pronouns as whole words
+_PRONOUN_PATTERN = re.compile(
+    r'\b(he|him|his|she|her|hers|it|its|they|them|their|theirs)\b',
+    re.IGNORECASE,
+)
+
+# Definite NP pattern: "the <noun>" -- captures the head noun after "the".
+# Matches single word only to avoid over-capturing verbs/adjectives.
+_DEFINITE_NP_PATTERN = re.compile(
+    r'\bthe\s+([A-Za-z][a-z]+)\b',
+    re.IGNORECASE,
+)
+
+
+def _pronoun_gender(pronoun: str) -> str:
+    """Return the gender/number category of a pronoun."""
+    lower = pronoun.lower()
+    if lower in _PRONOUNS_MASCULINE:
+        return "masculine"
+    if lower in _PRONOUNS_FEMININE:
+        return "feminine"
+    if lower in _PRONOUNS_NEUTRAL:
+        return "neutral"
+    return "plural"
+
+
+def _concept_matches_gender(concept: Concept, gender: str) -> bool:
+    """Check if a concept's type is compatible with a pronoun's gender."""
+    if gender == "masculine" or gender == "feminine":
+        return concept.concept_type == "named_entity_person"
+    if gender == "neutral":
+        # "it" → organizations, domain concepts, works
+        return concept.concept_type in (
+            "named_entity_organization", "domain_concept",
+            "named_entity_work",
+        )
+    # Plural → any concept type
+    return True
+
+
+def _find_antecedent(
+    concepts: list[Concept],
+    pronoun_gender: str,
+    pronoun_pos: int,
+) -> Concept | None:
+    """Find the nearest preceding concept that matches the pronoun's gender.
+
+    Only considers concepts whose last surface form appears before the pronoun.
+    """
+    best: Concept | None = None
+    best_pos = -1
+
+    for concept in concepts:
+        if not _concept_matches_gender(concept, pronoun_gender):
+            continue
+        # Find the latest surface form position that precedes the pronoun
+        for sf in concept.surface_forms:
+            if sf.end_char <= pronoun_pos and sf.start_char > best_pos:
+                best = concept
+                best_pos = sf.start_char
+
+    return best
+
+
+def _resolve_coreferences(
+    concepts: list[Concept],
+    text: str,
+) -> list[Concept]:
+    """Resolve pronoun and definite-NP coreferences within concepts.
+
+    Phase 2.3: Conservative within-segment resolution.
+    - Third-person pronouns → nearest matching named entity
+    - Definite NPs → matching concept by canonical name
+
+    Returns a new list of concepts with merged surface forms.
+    Concept count may decrease as coreferring mentions are merged.
+    """
+    if not concepts:
+        return concepts
+
+    # Build mutable working copies keyed by concept id
+    concept_map: dict[str, dict] = {}
+    for c in concepts:
+        concept_map[c.id] = {
+            "canonical_name": c.canonical_name,
+            "concept_type": c.concept_type,
+            "surface_forms": list(c.surface_forms),
+            "referencing_claim_ids": set(c.referencing_claim_ids),
+        }
+
+    # Pass 1: Pronoun resolution
+    for match in _PRONOUN_PATTERN.finditer(text):
+        pronoun = match.group(0)
+        pronoun_pos = match.start()
+        gender = _pronoun_gender(pronoun)
+
+        antecedent = _find_antecedent(concepts, gender, pronoun_pos)
+        if antecedent is None:
+            continue
+
+        # Add pronoun as a surface form of the antecedent
+        sf = ConceptSurfaceForm(
+            text=pronoun,
+            start_char=match.start(),
+            end_char=match.end(),
+        )
+        if antecedent.id in concept_map:
+            concept_map[antecedent.id]["surface_forms"].append(sf)
+
+    # Pass 2: Definite NP resolution via role-to-type matching.
+    # "the physicist" → person, "the company" → organization, "the theory" → domain concept
+    _ROLE_TO_TYPE: dict[str, str] = {
+        # Person roles
+        "physicist": "named_entity_person",
+        "mathematician": "named_entity_person",
+        "scientist": "named_entity_person",
+        "researcher": "named_entity_person",
+        "chemist": "named_entity_person",
+        "biologist": "named_entity_person",
+        "engineer": "named_entity_person",
+        "professor": "named_entity_person",
+        "economist": "named_entity_person",
+        "philosopher": "named_entity_person",
+        "historian": "named_entity_person",
+        "author": "named_entity_person",
+        "founder": "named_entity_person",
+        "ceo": "named_entity_person",
+        "leader": "named_entity_person",
+        # Organization roles
+        "company": "named_entity_organization",
+        "corporation": "named_entity_organization",
+        "organization": "named_entity_organization",
+        "institution": "named_entity_organization",
+        "university": "named_entity_organization",
+        "firm": "named_entity_organization",
+        "startup": "named_entity_organization",
+        "agency": "named_entity_organization",
+        "lab": "named_entity_organization",
+        "laboratory": "named_entity_organization",
+        # Concept roles
+        "theory": "domain_concept",
+        "approach": "domain_concept",
+        "method": "domain_concept",
+        "technique": "domain_concept",
+        "algorithm": "domain_concept",
+        "model": "domain_concept",
+        "framework": "domain_concept",
+        "phenomenon": "domain_concept",
+        "principle": "domain_concept",
+    }
+
+    for match in _DEFINITE_NP_PATTERN.finditer(text):
+        head_noun = match.group(1).lower()
+        np_start = match.start()
+        np_end = match.end()
+        target_type = _ROLE_TO_TYPE.get(head_noun)
+
+        if target_type is None:
+            continue
+
+        # Find the nearest preceding concept of the matching type
+        best: Concept | None = None
+        best_pos = -1
+        for concept in concepts:
+            if concept.concept_type != target_type:
+                continue
+            for sf in concept.surface_forms:
+                if sf.end_char <= np_start and sf.start_char > best_pos:
+                    best = concept
+                    best_pos = sf.start_char
+
+        if best is not None and best.id in concept_map:
+            sf = ConceptSurfaceForm(
+                text=match.group(0),
+                start_char=np_start,
+                end_char=np_end,
+            )
+            concept_map[best.id]["surface_forms"].append(sf)
+
+    # Rebuild concepts from the map, preserving original IDs
+    result: list[Concept] = []
+    for c in concepts:
+        if c.id not in concept_map:
+            result.append(c)
+            continue
+        data = concept_map[c.id]
+        result.append(Concept(
+            id=c.id,
+            canonical_name=data["canonical_name"],
+            concept_type=data["concept_type"],
+            surface_forms=tuple(data["surface_forms"]),
+            referencing_claim_ids=tuple(data["referencing_claim_ids"]),
+            domain_associations=c.domain_associations,
+            definition_provided=c.definition_provided,
+            definition_claim_id=c.definition_claim_id,
+        ))
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Phase 2.4: Domain Association and Definition Detection
+# ---------------------------------------------------------------------------
+
+# Domain keyword mapping -- curated keywords → domain labels with weights.
+# A concept's domain_associations is the union of all keywords it matches.
+_DOMAIN_KEYWORDS: dict[str, dict[str, float]] = {
+    # Physics
+    "quantum": {"physics": 0.9},
+    "entanglement": {"physics": 0.9},
+    "particle": {"physics": 0.8},
+    "photon": {"physics": 0.9},
+    "electron": {"physics": 0.9},
+    "relativity": {"physics": 0.9},
+    "wave function": {"physics": 0.9},
+    "superposition": {"physics": 0.9},
+    "thermodynamics": {"physics": 0.9},
+    "electromagnetic": {"physics": 0.9},
+    "gravitational": {"physics": 0.9},
+    "nuclear": {"physics": 0.8},
+    "atomic": {"physics": 0.8},
+    "newtonian": {"physics": 0.9},
+    # Computer Science / AI
+    "algorithm": {"computer_science": 0.8, "mathematics": 0.5},
+    "machine learning": {"computer_science": 0.9, "artificial_intelligence": 0.9},
+    "deep learning": {"computer_science": 0.9, "artificial_intelligence": 0.9},
+    "neural network": {"computer_science": 0.9, "artificial_intelligence": 0.9},
+    "transformer": {"computer_science": 0.8, "artificial_intelligence": 0.8},
+    "artificial intelligence": {"computer_science": 0.9, "artificial_intelligence": 0.9},
+    "natural language": {"computer_science": 0.8, "artificial_intelligence": 0.8},
+    "programming": {"computer_science": 0.9},
+    "software": {"computer_science": 0.8},
+    "hardware": {"computer_science": 0.8},
+    "database": {"computer_science": 0.9},
+    "compiler": {"computer_science": 0.9},
+    "computation": {"computer_science": 0.8, "mathematics": 0.6},
+    "cryptography": {"computer_science": 0.9, "mathematics": 0.7},
+    # Biology
+    "dna": {"biology": 0.9},
+    "rna": {"biology": 0.9},
+    "protein": {"biology": 0.9},
+    "gene": {"biology": 0.9},
+    "genetic": {"biology": 0.9},
+    "genome": {"biology": 0.9},
+    "cell": {"biology": 0.7},
+    "organism": {"biology": 0.8},
+    "species": {"biology": 0.8},
+    "evolution": {"biology": 0.8},
+    "mutation": {"biology": 0.9},
+    "enzyme": {"biology": 0.9},
+    # Medicine
+    "disease": {"medicine": 0.8},
+    "diagnosis": {"medicine": 0.9},
+    "treatment": {"medicine": 0.7},
+    "clinical": {"medicine": 0.8},
+    "patient": {"medicine": 0.8},
+    "symptom": {"medicine": 0.9},
+    "therapy": {"medicine": 0.8},
+    "surgical": {"medicine": 0.9},
+    "pharmaceutical": {"medicine": 0.9},
+    "vaccine": {"medicine": 0.9},
+    # Economics
+    "inflation": {"economics": 0.9},
+    "gdp": {"economics": 0.9},
+    "market": {"economics": 0.6},
+    "trade": {"economics": 0.6},
+    "investment": {"economics": 0.8},
+    "monetary": {"economics": 0.9},
+    "fiscal": {"economics": 0.9},
+    "recession": {"economics": 0.9},
+    # Mathematics
+    "theorem": {"mathematics": 0.9},
+    "equation": {"mathematics": 0.8},
+    "calculus": {"mathematics": 0.9},
+    "algebra": {"mathematics": 0.9},
+    "geometry": {"mathematics": 0.9},
+    "topology": {"mathematics": 0.9},
+    "probability": {"mathematics": 0.8},
+    "statistics": {"mathematics": 0.8},
+    "optimization": {"mathematics": 0.7, "computer_science": 0.6},
+    # Law
+    "legislation": {"law": 0.9},
+    "constitutional": {"law": 0.9},
+    "judicial": {"law": 0.9},
+    "statute": {"law": 0.9},
+    "regulation": {"law": 0.8},
+    "compliance": {"law": 0.7},
+    "liability": {"law": 0.9},
+    "jurisdiction": {"law": 0.9},
+    # Philosophy
+    "ethics": {"philosophy": 0.8},
+    "epistemology": {"philosophy": 0.9},
+    "metaphysics": {"philosophy": 0.9},
+    "consciousness": {"philosophy": 0.8},
+    "existentialism": {"philosophy": 0.9},
+    "stoicism": {"philosophy": 0.9},
+}
+
+
+def _associate_domains(concepts: list[Concept]) -> list[Concept]:
+    """Associate each concept with likely domains via keyword matching.
+
+    Phase 2.4: Keyword-based domain mapping. A concept's canonical name is
+    matched against curated domain keywords. Multiple domains may be
+    associated with different weights.
+
+    Returns updated concepts with domain_associations populated.
+    """
+    result: list[Concept] = []
+    for concept in concepts:
+        domains: dict[str, float] = {}
+        name_lower = concept.canonical_name.lower()
+
+        for keyword, domain_weights in _DOMAIN_KEYWORDS.items():
+            if keyword in name_lower:
+                for domain, weight in domain_weights.items():
+                    domains[domain] = max(domains.get(domain, 0.0), weight)
+
+        result.append(Concept(
+            id=concept.id,
+            canonical_name=concept.canonical_name,
+            concept_type=concept.concept_type,
+            surface_forms=concept.surface_forms,
+            referencing_claim_ids=concept.referencing_claim_ids,
+            domain_associations=domains,
+            definition_provided=concept.definition_provided,
+            definition_claim_id=concept.definition_claim_id,
+        ))
+
+    return result
+
+
+# Patterns for definition detection in claim text
+_DEFINITION_PATTERNS = [
+    re.compile(r'\b(is\s+(?:a|an|the)\s+.+)', re.IGNORECASE),
+    re.compile(r'\b(refers?\s+to\s+.+)', re.IGNORECASE),
+    re.compile(r'\b(is\s+defined\s+as\s+.+)', re.IGNORECASE),
+    re.compile(r'\b(,\s*or\s+.+,)', re.IGNORECASE),  # Appositive: "X, or Y,"
+]
+
+
+def _detect_definitions(
+    concepts: list[Concept],
+    claims: list[Claim],
+) -> list[Concept]:
+    """Detect which concepts are explicitly defined in the response.
+
+    Phase 2.4: Pattern-based definition detection. If a claim referenced
+    by a concept matches a definition pattern, the concept is marked as
+    having a definition provided.
+
+    Returns updated concepts with definition_provided and definition_claim_id.
+    """
+    result: list[Concept] = []
+    for concept in concepts:
+        def_provided = False
+        def_claim_id: str | None = None
+
+        for claim_id in concept.referencing_claim_ids:
+            # Find the claim text
+            claim = next((c for c in claims if c.id == claim_id), None)
+            if claim is None:
+                continue
+
+            claim_text = claim.text.lower()
+            # Check if the claim contains a definition pattern AND
+            # references the concept name
+            name_lower = concept.canonical_name.lower()
+            if name_lower not in claim_text:
+                continue
+
+            for pattern in _DEFINITION_PATTERNS:
+                if pattern.search(claim_text):
+                    def_provided = True
+                    def_claim_id = claim_id
+                    break
+
+            if def_provided:
+                break
+
+        result.append(Concept(
+            id=concept.id,
+            canonical_name=concept.canonical_name,
+            concept_type=concept.concept_type,
+            surface_forms=concept.surface_forms,
+            referencing_claim_ids=concept.referencing_claim_ids,
+            domain_associations=concept.domain_associations,
+            definition_provided=def_provided,
+            definition_claim_id=def_claim_id,
+        ))
+
+    return result
 
 
 # ---------------------------------------------------------------------------

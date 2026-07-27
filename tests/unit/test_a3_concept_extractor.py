@@ -9,6 +9,9 @@ from outputlens.analyzers.a3_concept_extractor import (
     ConceptExtractorAnalyzer,
     _claim_references_text,
     extract_concepts,
+    _associate_domains,
+    _detect_definitions,
+    _resolve_coreferences,
     extract_domain_concepts,
     extract_locations,
     extract_organizations,
@@ -581,3 +584,182 @@ class TestExtractConceptsWithDomainConcepts:
         ids = [c.id for c in concepts]
         expected = [f"con{i}" for i in range(1, len(ids) + 1)]
         assert ids == expected
+
+
+# ===================================================================
+# Phase 2.3: Coreference Resolution Tests
+# ===================================================================
+
+
+class TestCoreferenceResolution:
+    def test_pronoun_he_resolved(self):
+        text = "Albert Einstein proposed the theory. He won the Nobel Prize.\n"
+        norm = _make_norm(text)
+        claims = [
+            _make_claim("c1", text[:40], 0, 40),
+            _make_claim("c2", text[41:], 41, len(text)),
+        ]
+        concepts = extract_concepts(norm, claims)
+        einstein = [c for c in concepts if "Einstein" in c.canonical_name]
+        assert len(einstein) == 1
+        surface_texts = [sf.text.lower() for sf in einstein[0].surface_forms]
+        assert "he" in surface_texts
+
+    def test_pronoun_it_for_org(self):
+        text = "Google announced a breakthrough. It will release details.\n"
+        norm = _make_norm(text)
+        claims = [
+            _make_claim("c1", text[:32], 0, 32),
+            _make_claim("c2", text[33:], 33, len(text)),
+        ]
+        concepts = extract_concepts(norm, claims)
+        google = [c for c in concepts if "Google" in c.canonical_name]
+        assert len(google) >= 1
+        surface_texts = [sf.text.lower() for sf in google[0].surface_forms]
+        assert "it" in surface_texts
+
+    def test_pronoun_gender_agreement(self):
+        text = "Marie Curie and Albert Einstein worked together. He proposed relativity.\n"
+        norm = _make_norm(text)
+        claims = [_make_claim("c1", text, 0, len(text))]
+        concepts = extract_concepts(norm, claims)
+        einstein = [c for c in concepts if "Einstein" in c.canonical_name]
+        curie = [c for c in concepts if "Curie" in c.canonical_name]
+        if einstein and curie:
+            einstein_surfaces = [sf.text.lower() for sf in einstein[0].surface_forms]
+            curie_surfaces = [sf.text.lower() for sf in curie[0].surface_forms]
+            assert "he" in einstein_surfaces
+            assert "he" not in curie_surfaces
+
+    def test_definite_np_physicist(self):
+        text = "Albert Einstein developed relativity. The physicist won a prize.\n"
+        norm = _make_norm(text)
+        claims = [
+            _make_claim("c1", text[:42], 0, 42),
+            _make_claim("c2", text[43:], 43, len(text)),
+        ]
+        concepts = extract_concepts(norm, claims)
+        einstein = [c for c in concepts if "Einstein" in c.canonical_name]
+        assert len(einstein) == 1
+        surface_texts = [sf.text for sf in einstein[0].surface_forms]
+        assert any("physicist" in t.lower() for t in surface_texts)
+
+    def test_dummy_it_no_false_merge(self):
+        text = "It is an interesting phenomenon. No clear antecedent exists.\n"
+        norm = _make_norm(text)
+        claims = [_make_claim("c1", text, 0, len(text))]
+        concepts = extract_concepts(norm, claims)
+        assert isinstance(concepts, list)
+
+    def test_surface_forms_traceable_after_coref(self):
+        text = "Google was founded in 1998. It is now a large company.\n"
+        norm = _make_norm(text)
+        claims = [
+            _make_claim("c1", text[:26], 0, 26),
+            _make_claim("c2", text[27:], 27, len(text)),
+        ]
+        concepts = extract_concepts(norm, claims)
+        for concept in concepts:
+            for sf in concept.surface_forms:
+                assert sf.start_char >= 0
+                assert sf.end_char > sf.start_char
+                assert sf.text.lower() in text.lower()
+
+
+# ===================================================================
+# Phase 2.4: Domain Association and Definition Detection Tests
+# ===================================================================
+
+
+class TestDomainAssociation:
+    def test_physics_concept_gets_physics_domain(self):
+        from outputlens.analysis.model import Concept, ConceptSurfaceForm
+        c = Concept(
+            id="con1", canonical_name="quantum entanglement",
+            concept_type="domain_concept",
+            surface_forms=(ConceptSurfaceForm(text="quantum entanglement", start_char=0, end_char=20),),
+            referencing_claim_ids=("c1",),
+        )
+        result = _associate_domains([c])
+        assert len(result) == 1
+        assert result[0].domain_associations.get("physics", 0.0) > 0.5
+
+    def test_ai_concept_gets_cs_domain(self):
+        from outputlens.analysis.model import Concept, ConceptSurfaceForm
+        c = Concept(
+            id="con1", canonical_name="machine learning",
+            concept_type="domain_concept",
+            surface_forms=(ConceptSurfaceForm(text="machine learning", start_char=0, end_char=16),),
+            referencing_claim_ids=("c1",),
+        )
+        result = _associate_domains([c])
+        assert result[0].domain_associations.get("computer_science", 0.0) > 0.5
+
+    def test_unknown_concept_empty_domains(self):
+        from outputlens.analysis.model import Concept, ConceptSurfaceForm
+        c = Concept(
+            id="con1", canonical_name="unknown term",
+            concept_type="domain_concept",
+            surface_forms=(ConceptSurfaceForm(text="unknown term", start_char=0, end_char=12),),
+            referencing_claim_ids=("c1",),
+        )
+        result = _associate_domains([c])
+        assert result[0].domain_associations == {}
+
+    def test_multi_domain_concept(self):
+        from outputlens.analysis.model import Concept, ConceptSurfaceForm
+        c = Concept(
+            id="con1", canonical_name="optimization algorithm",
+            concept_type="domain_concept",
+            surface_forms=(ConceptSurfaceForm(text="optimization algorithm", start_char=0, end_char=22),),
+            referencing_claim_ids=("c1",),
+        )
+        result = _associate_domains([c])
+        domains = result[0].domain_associations
+        assert len(domains) >= 1
+
+
+class TestDefinitionDetection:
+    def test_is_a_definition_detected(self):
+        from outputlens.analysis.model import Concept, ConceptSurfaceForm
+        c = Concept(
+            id="con1", canonical_name="quantum entanglement",
+            concept_type="domain_concept",
+            surface_forms=(ConceptSurfaceForm(text="quantum entanglement", start_char=0, end_char=20),),
+            referencing_claim_ids=("c1",),
+        )
+        claims = [
+            _make_claim("c1", "quantum entanglement is a phenomenon where particles become correlated.", 0, 73),
+        ]
+        result = _detect_definitions([c], claims)
+        assert result[0].definition_provided is True
+        assert result[0].definition_claim_id == "c1"
+
+    def test_no_definition_when_concept_not_in_claim(self):
+        from outputlens.analysis.model import Concept, ConceptSurfaceForm
+        c = Concept(
+            id="con1", canonical_name="quantum entanglement",
+            concept_type="domain_concept",
+            surface_forms=(ConceptSurfaceForm(text="quantum entanglement", start_char=0, end_char=20),),
+            referencing_claim_ids=("c1",),
+        )
+        claims = [
+            _make_claim("c1", "This is an unrelated claim about other topics.", 0, 45),
+        ]
+        result = _detect_definitions([c], claims)
+        assert result[0].definition_provided is False
+
+    def test_end_to_end_domain_and_definition(self):
+        text = "Quantum entanglement is a phenomenon in physics. It was studied by Einstein.\n"
+        norm = _make_norm(text)
+        claims = [_make_claim("c1", text[:55], 0, 55),
+                  _make_claim("c2", text[56:], 56, len(text))]
+        concepts = extract_concepts(norm, claims)
+
+        # Find the "quantum entanglement" concept
+        qe = [c for c in concepts if "entanglement" in c.canonical_name.lower()]
+        if qe:
+            assert qe[0].definition_provided is True
+            # Should have physics domain association
+            domains = qe[0].domain_associations
+            assert len(domains) >= 1

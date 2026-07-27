@@ -7,9 +7,10 @@
 
 ## Current Milestone
 
-**Milestone 2: Concept Extraction** -- IN PROGRESS
-- Phase 2.1 (Named Entity Recognition) -- COMPLETE (2026-07-27)
-- Phase 2.2 (Domain Concept Identification) -- COMPLETE (2026-07-27)
+**Milestone 2: Concept Extraction** -- COMPLETE (2026-07-27)
+- All 5 phases complete. 69 A3 tests + 185 existing = 254 total passing.
+
+**Next**: Milestone 3 (A4/A5/A6: Classification) -- see `docs/ROADMAP.md`
 
 **Next**: Phase 2.2 after Phase 2.1 review
 
@@ -58,7 +59,7 @@ are preserved in the project plan file.
 |---|---|---|
 | A1 | Text Normalizer | Implemented |
 | A2 | Claim Extractor | Implemented (M1 complete) |
-| A3 | Concept Extractor | Phase 2.1 done (named entities) |
+| A3 | Concept Extractor | Implemented (M2 complete) |
 | A4-A16 | All remaining analyzers | Not started |
 
 ### Tests
@@ -70,8 +71,8 @@ are preserved in the project plan file.
 | `tests/unit/test_orchestration.py` | 25 | All passing |
 | `tests/unit/test_a2_claim_extractor.py` | 86 | All passing |
 | `tests/unit/test_a2_regression.py` | 18 | All passing |
-| `tests/unit/test_a3_concept_extractor.py` | 56 | All passing |
-| **Total** | **241** | **All passing** |
+| `tests/unit/test_a3_concept_extractor.py` | 69 | All passing |
+| **Total** | **254** | **All passing** |
 
 ### Interfaces
 

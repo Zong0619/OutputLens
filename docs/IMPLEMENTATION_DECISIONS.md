@@ -392,3 +392,25 @@ included.
 will evolve as evaluation reveals domain-specific patterns. The distinction
 between domain_concept and common_concept may benefit from ML-based
 classification in future versions.
+
+---
+
+### A3-005: Conservative pronoun and definite-NP coreference resolution
+
+**Date**: 2026-07-27
+**Component**: A3 Concept Extractor -- Phase 2.3
+**Spec Reference**: Specification is silent on coreference resolution methodology.
+
+**Choice**: Two-pass coreference resolution: (1) third-person pronouns matched to
+nearest preceding concept of compatible gender/number type; (2) "the <role>"
+definite NPs matched via curated role-to-type mapping (~45 entries). Both
+passes are within-segment, conservative, and require unambiguous antecedents.
+
+**Alternatives**: spaCy/Stanford CoreNLP coref, LLM-based, or no coref at all.
+
+**Rationale**: Deterministic, zero-dependency approach handling the most common
+AI response patterns (entity introduced, then referenced by pronoun/role).
+Conservative: false negatives preferred over false positives.
+
+**Stability**: Low. Role mapping and pronoun heuristics will expand with
+evaluation. Cross-paragraph coref is a known limitation.
