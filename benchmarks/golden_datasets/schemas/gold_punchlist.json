@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spec.outputlens.org/schemas/gold-punchlist.json",
+  "title": "GOLD-PUNCHLIST Dataset Schema",
+  "description": "Evaluates A16 Verification Punchlist: ranking quality and usefulness.",
+
+  "defs": {
+    "punchlist_annotation": {
+      "type": "object",
+      "required": ["annotator_id", "rankings"],
+      "properties": {
+        "annotator_id": {"type": "string"},
+        "annotation_timestamp": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string"},
+        "overall_usefulness": {
+          "type": "integer", "minimum": 1, "maximum": 5,
+          "description": "How useful is this punchlist overall? 1=not useful, 5=very useful."
+        },
+        "rankings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim_text", "start_char", "end_char", "should_verify", "priority"],
+            "properties": {
+              "claim_text": {"type": "string"},
+              "start_char": {"type": "integer", "minimum": 0},
+              "end_char": {"type": "integer", "minimum": 0},
+              "should_verify": {
+                "type": "boolean",
+                "description": "Would you investigate this claim? (not: is this claim false?)"
+              },
+              "priority": {
+                "type": "integer", "minimum": 1, "maximum": 5,
+                "description": "Investigation priority: 1=highest, 5=lowest."
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why should this claim be investigated?"
+              },
+              "suggested_verification": {
+                "type": "string",
+                "description": "How would you investigate this claim?"
+              }
+            }
+          }
+        },
+        "missing_claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim_text", "start_char", "end_char"],
+            "properties": {
+              "claim_text": {"type": "string"},
+              "start_char": {"type": "integer"},
+              "end_char": {"type": "integer"},
+              "reason": {"type": "string"}
+            }
+          },
+          "description": "Claims the annotator believes should be in the punchlist but are missing."
+        }
+      }
+    }
+  }
+}

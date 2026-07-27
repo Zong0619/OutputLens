@@ -620,3 +620,37 @@ determination (Principle 17). A16 that claimed "this claim is false" would
 violate the project's non-goals.
 
 **Stability**: High. This is a constitutional constraint.
+
+---
+
+### M6-001: Evaluation Does Not Define Correctness
+
+**Date**: 2026-07-27
+**Component**: Milestone 6 -- Evaluation Infrastructure
+**Spec Reference**: Principles 2, 4, 17. A4/A5-001, A6-001, A16-001.
+
+**Choice**: Evaluation infrastructure measures agreement, consistency,
+usefulness, and explainability. It does not establish that analyzer outputs
+are objectively correct. Golden datasets are measurement tools representing
+annotated human judgments, not absolute truth.
+
+**Annotation guidelines explicitly instruct annotators to**:
+- Classify epistemological characteristics, not truth or correctness.
+- Record uncertainty when they cannot confidently assign a classification.
+- Note disagreements as data, not errors to be resolved.
+
+**Evaluation metrics report**:
+- Agreement between analyzer and human annotators (Cohen's kappa, F1).
+- Inter-annotator agreement as a measure of task difficulty.
+- Reasoning quality as rated by human evaluators.
+
+**Evaluation metrics do NOT report**:
+- "Accuracy" or "correctness" of classifications.
+- "Error rates" implying the analyzer was wrong.
+- Any metric that could be interpreted as truth verification.
+
+**Rationale**: OutputLens evaluates analytical usefulness rather than truth
+determination. If evaluation claimed to measure correctness, it would
+contradict Principles 2 and 17, and undermine the project's non-goals.
+
+**Stability**: High. Constitutional constraint.

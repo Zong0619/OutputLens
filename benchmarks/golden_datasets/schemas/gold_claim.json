@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spec.outputlens.org/schemas/gold-claim.json",
+  "title": "GOLD-CLAIM Dataset Schema",
+  "description": "Evaluates A2 Claim Extractor: claim boundaries, types, and confidence markers.",
+
+  "defs": {
+    "claim_annotation": {
+      "type": "object",
+      "required": ["annotator_id", "claims"],
+      "properties": {
+        "annotator_id": {"type": "string"},
+        "annotation_timestamp": {"type": "string", "format": "date-time"},
+        "notes": {"type": "string"},
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim_text", "start_char", "end_char", "claim_type"],
+            "properties": {
+              "claim_text": {"type": "string", "minLength": 3},
+              "start_char": {"type": "integer", "minimum": 0},
+              "end_char": {"type": "integer", "minimum": 0},
+              "claim_type": {
+                "type": "string",
+                "enum": [
+                  "factual_assertion", "conceptual_definition",
+                  "causal_claim", "predictive_claim", "normative_claim",
+                  "methodological_claim", "comparative_claim",
+                  "attribution_claim", "meta_claim"
+                ]
+              },
+              "confidence_markers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["expression", "start_char", "end_char", "type"],
+                  "properties": {
+                    "expression": {"type": "string"},
+                    "start_char": {"type": "integer", "minimum": 0},
+                    "end_char": {"type": "integer", "minimum": 0},
+                    "type": {"type": "string", "enum": ["hedge", "certainty"]},
+                    "intensity": {"type": "string", "enum": ["weak", "moderate", "strong"]}
+                  }
+                }
+              },
+              "uncertain": {"type": "boolean", "description": "True if annotator is uncertain about this claim boundary or type."}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spec.outputlens.org/schemas/gold-classification.json",
+  "title": "GOLD-ESTABLISHED / GOLD-EVIDENCE / GOLD-NOVELTY Shared Schema",
+  "description": "Common structure for classification evaluation datasets.",
+
+  "defs": {
+    "classification_annotation": {
+      "type": "object",
+      "required": ["annotator_id", "classifications"],
+      "properties": {
+        "annotator_id": {"type": "string"},
+        "annotation_timestamp": {"type": "string", "format": "date-time"},
+        "annotator_domain_expertise": {
+          "type": "string",
+          "enum": ["none", "general", "domain_informed", "domain_expert"],
+          "description": "Self-reported domain expertise level."
+        },
+        "notes": {"type": "string"},
+        "classifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim_text", "start_char", "end_char", "level", "reasoning"],
+            "properties": {
+              "claim_text": {"type": "string", "minLength": 3},
+              "start_char": {"type": "integer", "minimum": 0},
+              "end_char": {"type": "integer", "minimum": 0},
+              "level": {
+                "type": "string",
+                "description": "E1-E5 for establishedness, R1-R4 for evidence, N1-N5 for novelty"
+              },
+              "reasoning": {
+                "type": "string",
+                "minLength": 20,
+                "description": "Natural language reasoning explaining the classification."
+              },
+              "uncertain": {
+                "type": "boolean",
+                "description": "True if annotator is uncertain about this classification."
+              },
+              "alternative_level": {
+                "type": "string",
+                "description": "If uncertain, the annotator's second-choice level."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

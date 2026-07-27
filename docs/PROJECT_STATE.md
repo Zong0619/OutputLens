@@ -1,20 +1,23 @@
 # OutputLens -- Project State
 
-**Last updated**: 2026-07-27 (Milestone 3 complete)
+**Last updated**: 2026-07-27 (Milestone 6 -- Evaluation Infrastructure)
 **Purpose**: Living document. Updated continuously as the project evolves.
 
 ---
 
 ## Current Milestone
 
-**Milestone 3: Classification** -- COMPLETE (2026-07-27)
-- A4, A5, A9, A10 implemented. 337 tests passing.
-- Full A1→A2→A3→{A4,A5}→{A9,A10} pipeline validated.
+**Milestone 6: Evaluation Infrastructure** -- IN PROGRESS (Phase 6.1)
 
-**Milestone 5: Final Analyzers** -- COMPLETE (2026-07-27)
-- A8, A14, A15, A16 implemented. All 16 analyzers complete. 402 tests passing.
+**Previous Milestones (all complete)**:
+- M0: Infrastructure (81 tests)
+- M1: Claim Extraction (104 A2 tests)
+- M2: Concept Extraction (69 A3 tests)
+- M3: Classification Layer (A4, A5, A9, A10 -- 83 tests)
+- M4: Remaining Classifiers (A6, A7, A11, A12, A13 -- 52 tests)
+- M5: Final Analyzers (A8, A14, A15, A16 -- 13 tests)
 
-**The reference implementation engine is functionally complete.**
+**Status**: All 16 analyzers implemented. 402 tests passing. Reference engine functionally complete. M6 adds evaluation infrastructure only -- no analyzer changes.
 
 ## Completed Milestones
 
