@@ -13,6 +13,7 @@ To add a new analyzer:
 from outputlens.analyzers import (
     a1_normalizer, a2_claim_extractor, a3_concept_extractor,
     a4_establishedness, a5_evidence_requirement,
+    a9_a10_synthesis,
 )
 from outputlens.orchestration.engine import AnalyzerRegistry
 
@@ -27,3 +28,4 @@ def register_all(registry: AnalyzerRegistry) -> None:
     a3_concept_extractor.register(registry)
     a4_establishedness.register(registry)
     a5_evidence_requirement.register(registry)
+    a9_a10_synthesis.register(registry)
