@@ -33,12 +33,16 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.10",
 ]
+api = [
+    "flask>=3.0",
+]
 all = [
-    "outputlens[dev]",
+    "outputlens[dev,api]",
 ]
 
 [project.scripts]
 outputlens = "outputlens.interfaces.cli:main"
+outputlens-serve = "outputlens.interfaces.api:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

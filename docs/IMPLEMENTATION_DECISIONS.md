@@ -764,6 +764,23 @@ use the API or embed the engine directly.
 demonstrates a clear need, provided it does not introduce analytical
 logic into the CLI.
 
-**Stability**: High. This is a product-boundary decision. Expanding
-interface scope would require a governance discussion about the project's
-identity.
+---
+
+### M7-006: API Production Readiness is a Downstream Concern
+
+**Date**: 2026-07-27
+**Component**: M7 -- REST API (Phase 7.2)
+**Spec Reference**: M7-003 (Reference Interface Scope).
+
+**Choice**: The reference API demonstrates integration patterns. Production
+concerns -- authentication, authorization, rate limiting, deployment
+configuration, monitoring -- are downstream concerns that should be
+addressed without changing the API's role as a thin interface layer or
+modifying the core engine boundary.
+
+**Rationale**: Separating reference interfaces from production
+infrastructure keeps the project architecture simple and portable.
+OutputLens remains an analytical engine, not a hosted service.
+
+**Stability**: High. This is a product-boundary decision derived from
+M7-003.
