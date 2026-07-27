@@ -14,6 +14,7 @@ from outputlens.analyzers import (
     a1_normalizer, a2_claim_extractor, a3_concept_extractor,
     a4_establishedness, a5_evidence_requirement,
     a6_novelty, a7_claim_relationships, a9_a10_synthesis,
+    a11_a12_a13_synthesis,
 )
 from outputlens.orchestration.engine import AnalyzerRegistry
 
@@ -31,3 +32,4 @@ def register_all(registry: AnalyzerRegistry) -> None:
     a6_novelty.register(registry)
     a7_claim_relationships.register(registry)
     a9_a10_synthesis.register(registry)
+    a11_a12_a13_synthesis.register(registry)

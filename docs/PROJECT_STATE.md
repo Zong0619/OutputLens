@@ -11,7 +11,10 @@
 - A4, A5, A9, A10 implemented. 337 tests passing.
 - Full A1→A2→A3→{A4,A5}→{A9,A10} pipeline validated.
 
-**Next**: Milestone 4 (A6, A7, A11, A12, A13) -- see `docs/ROADMAP.md`
+**Milestone 4: Remaining Classifiers** -- COMPLETE (2026-07-27)
+- A6, A7, A11, A12, A13 implemented. 389 tests passing.
+
+**Next**: Milestone 5 (A8, A14, A15, A16) -- see `docs/ROADMAP.md`
 
 ## Completed Milestones
 
@@ -61,9 +64,14 @@ are preserved in the project plan file.
 | A3 | Concept Extractor | Implemented (M2 complete) |
 | A4 | Establishedness Analyzer | Implemented (M3) |
 | A5 | Evidence Requirement Analyzer | Implemented (M3) |
+| A6 | Novelty Analyzer | Implemented (M4) |
+| A7 | Claim Relationship Mapper | Implemented (M4) |
 | A9 | Trust Profile Generator | Implemented (M3) |
 | A10 | Evidence Gap Analyzer | Implemented (M3) |
-| A6-A8, A11-A16 | Remaining analyzers | Not started |
+| A11 | Novelty Index Calculator | Implemented (M4) |
+| A12 | Overconfidence Detector | Implemented (M4) |
+| A13 | Structural Integrity Analyzer | Implemented (M4) |
+| A8, A14-A16 | Remaining analyzers | Not started |
 
 ### Tests
 
@@ -77,8 +85,11 @@ are preserved in the project plan file.
 | `tests/unit/test_a3_concept_extractor.py` | 69 | All passing |
 | `tests/unit/test_a5_evidence_requirement.py` | 41 | All passing |
 | `tests/unit/test_a4_establishedness.py` | 27 | All passing |
+| `tests/unit/test_a6_novelty.py` | 24 | All passing |
+| `tests/unit/test_a7_claim_relationships.py` | 19 | All passing |
 | `tests/unit/test_a9_a10_synthesis.py` | 15 | All passing |
-| **Total** | **337** | **All passing** |
+| `tests/unit/test_a11_a12_a13_synthesis.py` | 9 | All passing |
+| **Total** | **389** | **All passing** |
 
 ### Interfaces
 
