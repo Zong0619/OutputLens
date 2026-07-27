@@ -1,0 +1,677 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spec.outputlens.org/schemas/analysis-document-v1.json",
+  "title": "OutputLens AnalysisDocument v1.0",
+  "description": "The complete output of an OutputLens analysis run. This is the primary integration contract between the engine and all interfaces.",
+
+  "type": "object",
+  "required": ["schema_version", "metadata", "analysis_objects"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "AnalysisDocument schema version. Interfaces MUST check this field before consuming the document."
+    },
+
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    },
+
+    "runtime_objects": {
+      "type": "object",
+      "description": "Runtime objects needed for position resolution and rendering.",
+      "required": ["raw_input", "normalized_text", "position_index"],
+      "properties": {
+        "raw_input": {"$ref": "#/$defs/RawInput"},
+        "normalized_text": {"$ref": "#/$defs/NormalizedText"},
+        "position_index": {"$ref": "#/$defs/PositionIndex"},
+        "execution_trace": {"$ref": "#/$defs/ExecutionTrace"}
+      }
+    },
+
+    "analysis_objects": {
+      "type": "object",
+      "description": "Analysis model objects produced by analyzers.",
+      "required": ["claims"],
+      "properties": {
+        "claims": {
+          "type": "array",
+          "description": "Claims extracted from the text (A2 output).",
+          "items": {"$ref": "#/$defs/Claim"}
+        },
+        "concepts": {
+          "type": "array",
+          "description": "Concepts identified in the text (A3 output).",
+          "items": {"$ref": "#/$defs/Concept"}
+        },
+        "establishedness_annotations": {
+          "type": "array",
+          "description": "Establishedness classifications (A4 output).",
+          "items": {"$ref": "#/$defs/EstablishednessAnnotation"}
+        },
+        "evidence_annotations": {
+          "type": "array",
+          "description": "Evidence requirement classifications (A5 output).",
+          "items": {"$ref": "#/$defs/EvidenceAnnotation"}
+        },
+        "novelty_annotations": {
+          "type": "array",
+          "description": "Novelty classifications (A6 output).",
+          "items": {"$ref": "#/$defs/NoveltyAnnotation"}
+        },
+        "claim_graph": {
+          "$ref": "#/$defs/ClaimGraph",
+          "description": "Claim relationship graph (A7 output)."
+        },
+        "concept_graph": {
+          "$ref": "#/$defs/ConceptGraph",
+          "description": "Concept relationship graph (A8 output)."
+        },
+        "trust_profile": {
+          "$ref": "#/$defs/TrustProfile",
+          "description": "Response-level trust profile (A9 output)."
+        },
+        "evidence_gap_report": {
+          "$ref": "#/$defs/EvidenceGapReport",
+          "description": "Evidence gap analysis (A10 output)."
+        },
+        "novelty_index": {
+          "$ref": "#/$defs/NoveltyIndex",
+          "description": "Novelty index (A11 output)."
+        },
+        "overconfidence_report": {
+          "$ref": "#/$defs/OverconfidenceReport",
+          "description": "Overconfidence detection report (A12 output)."
+        },
+        "structural_integrity_report": {
+          "$ref": "#/$defs/StructuralIntegrityReport",
+          "description": "Structural integrity analysis (A13 output)."
+        },
+        "coherence_report": {
+          "$ref": "#/$defs/CoherenceReport",
+          "description": "Conceptual coherence analysis (A14 output)."
+        },
+        "response_narrative": {
+          "$ref": "#/$defs/ResponseNarrative",
+          "description": "Human-readable analysis summary (A15 output)."
+        },
+        "verification_punchlist": {
+          "$ref": "#/$defs/VerificationPunchlist",
+          "description": "Prioritized verification punchlist (A16 output)."
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "Metadata": {
+      "type": "object",
+      "required": ["engine_version", "timestamp", "analysis_id"],
+      "properties": {
+        "engine_version": {
+          "type": "string",
+          "description": "Semantic version of the OutputLens engine.",
+          "examples": ["0.1.0"]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp of analysis initiation."
+        },
+        "analysis_id": {
+          "type": "string",
+          "description": "Unique identifier for this analysis run (UUID v4).",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Optional prompt that generated the analyzed text."
+        },
+        "model_identifier": {
+          "type": "string",
+          "description": "Optional identifier of the AI model that generated the text."
+        },
+        "domain_hint": {
+          "type": "string",
+          "description": "Optional domain context provided by the user."
+        }
+      }
+    },
+
+    "RawInput": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The original, unmodified text as submitted by the user."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Optional prompt that generated this text."
+        }
+      }
+    },
+
+    "NormalizedText": {
+      "type": "object",
+      "required": ["text", "segments"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Unicode-normalized (NFKC), whitespace-regularized text for analysis."
+        },
+        "segments": {
+          "type": "array",
+          "description": "Structural divisions of the text.",
+          "items": {"$ref": "#/$defs/Segment"}
+        }
+      }
+    },
+
+    "Segment": {
+      "type": "object",
+      "required": ["id", "type", "start_char", "end_char"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique segment identifier within the analysis."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["paragraph", "heading", "list_item", "code_block", "blockquote", "table_cell"],
+          "description": "Structural type of this segment."
+        },
+        "start_char": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Start character offset in NormalizedText."
+        },
+        "end_char": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "End character offset in NormalizedText (exclusive)."
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "Optional parent segment ID for hierarchical structure."
+        },
+        "label": {
+          "type": "string",
+          "description": "Optional heading text or list marker."
+        }
+      }
+    },
+
+    "PositionIndex": {
+      "type": "object",
+      "required": ["mappings"],
+      "properties": {
+        "mappings": {
+          "type": "array",
+          "description": "Bidirectional character offset mappings.",
+          "items": {
+            "type": "object",
+            "required": ["normalized_start", "normalized_end", "raw_start", "raw_end"],
+            "properties": {
+              "normalized_start": {"type": "integer", "minimum": 0},
+              "normalized_end": {"type": "integer", "minimum": 0},
+              "raw_start": {"type": "integer", "minimum": 0},
+              "raw_end": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+
+    "ExecutionTrace": {
+      "type": "object",
+      "properties": {
+        "analyzer_executions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["analyzer_id", "analyzer_version", "started_at", "completed_at", "status"],
+            "properties": {
+              "analyzer_id": {"type": "string"},
+              "analyzer_version": {"type": "string"},
+              "started_at": {"type": "string", "format": "date-time"},
+              "completed_at": {"type": "string", "format": "date-time"},
+              "status": {"type": "string", "enum": ["success", "failure", "skipped", "degraded"]},
+              "input_hashes": {
+                "type": "object",
+                "description": "Content hashes of inputs consumed, for reproducibility.",
+                "additionalProperties": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "ConfidenceMarker": {
+      "type": "object",
+      "required": ["id", "type", "start_char", "end_char", "claim_id"],
+      "properties": {
+        "id": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["hedge", "certainty"],
+          "description": "Whether this marker expresses hedging or certainty."
+        },
+        "expression": {
+          "type": "string",
+          "description": "The actual linguistic expression (e.g., 'may', 'definitely')."
+        },
+        "intensity": {
+          "type": "string",
+          "enum": ["weak", "moderate", "strong"],
+          "description": "The intensity of the hedge or certainty expression."
+        },
+        "start_char": {"type": "integer", "minimum": 0},
+        "end_char": {"type": "integer", "minimum": 0},
+        "claim_id": {
+          "type": "string",
+          "description": "The Claim this marker is associated with."
+        }
+      }
+    },
+
+    "Claim": {
+      "type": "object",
+      "required": ["id", "text", "start_char", "end_char", "segment_id", "claim_type"],
+      "properties": {
+        "id": {"type": "string", "description": "Unique claim identifier within the analysis (e.g., 'c1', 'c2')."},
+        "text": {"type": "string", "description": "Verbatim claim text from NormalizedText."},
+        "start_char": {"type": "integer", "minimum": 0, "description": "Start offset in NormalizedText."},
+        "end_char": {"type": "integer", "minimum": 0, "description": "End offset in NormalizedText (exclusive)."},
+        "segment_id": {"type": "string", "description": "The Segment this claim belongs to."},
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "factual_assertion",
+            "conceptual_definition",
+            "causal_claim",
+            "predictive_claim",
+            "normative_claim",
+            "methodological_claim",
+            "comparative_claim",
+            "attribution_claim",
+            "meta_claim"
+          ],
+          "description": "Preliminary structural type of this claim."
+        },
+        "confidence_markers": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/ConfidenceMarker"},
+          "description": "Hedging and certainty markers detected in or adjacent to this claim."
+        },
+        "knowledge_signature": {
+          "type": "string",
+          "description": "v3-forward latent field. A representation of the propositional content, independent of surface form. Not consumed by v2 analyzers."
+        }
+      }
+    },
+
+    "Concept": {
+      "type": "object",
+      "required": ["id", "canonical_name", "concept_type"],
+      "properties": {
+        "id": {"type": "string"},
+        "canonical_name": {"type": "string", "description": "The primary name for this concept."},
+        "surface_forms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["text", "start_char", "end_char"],
+            "properties": {
+              "text": {"type": "string"},
+              "start_char": {"type": "integer", "minimum": 0},
+              "end_char": {"type": "integer", "minimum": 0}
+            }
+          },
+          "description": "All text spans that refer to this concept."
+        },
+        "concept_type": {
+          "type": "string",
+          "enum": [
+            "named_entity_person",
+            "named_entity_organization",
+            "named_entity_location",
+            "named_entity_work",
+            "domain_concept",
+            "novel_construct",
+            "common_concept"
+          ]
+        },
+        "domain_associations": {
+          "type": "object",
+          "description": "Weighted domain associations. Keys are domain names, values are 0.0–1.0 weights.",
+          "additionalProperties": {"type": "number", "minimum": 0.0, "maximum": 1.0}
+        },
+        "referencing_claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Claim IDs that reference this concept."
+        },
+        "definition_provided": {"type": "boolean", "description": "Whether the response defines this concept."},
+        "definition_claim_id": {"type": "string", "description": "If defined, which claim contains the definition."}
+      }
+    },
+
+    "EstablishednessAnnotation": {
+      "type": "object",
+      "required": ["claim_id", "level", "reasoning"],
+      "properties": {
+        "claim_id": {"type": "string"},
+        "level": {
+          "type": "string",
+          "enum": ["E1", "E2", "E3", "E4", "E5"],
+          "description": "E1=Common Knowledge, E2=Domain Established, E3=Plausible, E4=Unverifiable, E5=Unknown/Boundary"
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 20,
+          "description": "Natural language reasoning explaining why this level was assigned."
+        }
+      }
+    },
+
+    "EvidenceAnnotation": {
+      "type": "object",
+      "required": ["claim_id", "level", "reasoning"],
+      "properties": {
+        "claim_id": {"type": "string"},
+        "level": {
+          "type": "string",
+          "enum": ["R1", "R2", "R3", "R4"],
+          "description": "R1=Self-Evident, R2=Evidence Provided, R3=Evidence Expected, R4=Evidence Essential"
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 20
+        }
+      }
+    },
+
+    "NoveltyAnnotation": {
+      "type": "object",
+      "required": ["claim_id", "level", "reasoning"],
+      "properties": {
+        "claim_id": {"type": "string"},
+        "level": {
+          "type": "string",
+          "enum": ["N1", "N2", "N3", "N4", "N5"],
+          "description": "N1=Canonical, N2=Non-Trivial Synthesis, N3=Potentially Novel, N4=Apparently Original, N5=Uncertain"
+        },
+        "reasoning": {
+          "type": "string",
+          "minLength": 20
+        }
+      }
+    },
+
+    "ClaimRelationship": {
+      "type": "object",
+      "required": ["source_claim_id", "target_claim_id", "relationship_type"],
+      "properties": {
+        "source_claim_id": {"type": "string"},
+        "target_claim_id": {"type": "string"},
+        "relationship_type": {
+          "type": "string",
+          "enum": ["supports", "contradicts", "elaborates", "depends_on", "generalizes", "restates", "concedes", "sequences"]
+        },
+        "strength": {
+          "type": "string",
+          "enum": ["explicit", "implicit"]
+        }
+      }
+    },
+
+    "ConceptRelationship": {
+      "type": "object",
+      "required": ["source_concept_id", "target_concept_id", "relationship_type"],
+      "properties": {
+        "source_concept_id": {"type": "string"},
+        "target_concept_id": {"type": "string"},
+        "relationship_type": {
+          "type": "string",
+          "enum": ["is_a", "part_of", "causes", "precedes", "related_to", "contrasts_with", "analogous_to", "defines", "measures", "depends_on"]
+        },
+        "evidence": {
+          "type": "string",
+          "enum": ["explicit", "claim_inferred", "cooccurrence"]
+        }
+      }
+    },
+
+    "ClaimGraph": {
+      "type": "object",
+      "required": ["relationships"],
+      "properties": {
+        "relationships": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/ClaimRelationship"}
+        },
+        "foundational_claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Claims on which many other claims depend."
+        },
+        "orphan_claim_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Claims with no relationships."
+        },
+        "contradiction_clusters": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "description": "Groups of mutually contradictory claims."
+        },
+        "cascading_uncertainty_chains": {
+          "type": "array",
+          "description": "Dependency chains rooted in uncertain claims.",
+          "items": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    },
+
+    "ConceptGraph": {
+      "type": "object",
+      "required": ["relationships"],
+      "properties": {
+        "relationships": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/ConceptRelationship"}
+        },
+        "centrality_scores": {
+          "type": "object",
+          "additionalProperties": {"type": "number"},
+          "description": "Concept ID → centrality score mapping."
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "description": "Groups of tightly interconnected concept IDs."
+        },
+        "bridge_concept_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Concepts connecting otherwise separate clusters."
+        },
+        "novel_construct_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Concept IDs for novel constructs and their graph placements."
+        },
+        "missing_connections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["concept_a_id", "concept_b_id"],
+            "properties": {
+              "concept_a_id": {"type": "string"},
+              "concept_b_id": {"type": "string"}
+            }
+          },
+          "description": "Concept pairs that co-occur in claims but have no explicit relationship."
+        }
+      }
+    },
+
+    "TrustProfile": {
+      "type": "object",
+      "required": ["established_pct", "plausible_pct", "needs_verification_pct"],
+      "properties": {
+        "established_pct": {"type": "number", "minimum": 0.0, "maximum": 100.0},
+        "plausible_pct": {"type": "number", "minimum": 0.0, "maximum": 100.0},
+        "needs_verification_pct": {"type": "number", "minimum": 0.0, "maximum": 100.0},
+        "caveat": {
+          "type": "string",
+          "const": "This is not a reliability score. Different contexts need different standards."
+        }
+      }
+    },
+
+    "EvidenceGapReport": {
+      "type": "object",
+      "required": ["gap_ratio", "r3_count", "r4_count"],
+      "properties": {
+        "gap_ratio": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "r3_count": {"type": "integer", "minimum": 0},
+        "r4_count": {"type": "integer", "minimum": 0},
+        "by_claim_type": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["r3_count", "r4_count"],
+            "properties": {
+              "r3_count": {"type": "integer"},
+              "r4_count": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+
+    "NoveltyIndex": {
+      "type": "object",
+      "required": ["novelty_proportion", "caveat"],
+      "properties": {
+        "novelty_proportion": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "n3_count": {"type": "integer", "minimum": 0},
+        "n4_count": {"type": "integer", "minimum": 0},
+        "n5_count": {"type": "integer", "minimum": 0},
+        "caveat": {
+          "type": "string",
+          "const": "High novelty is not inherently good or bad. It depends on your context and use case."
+        }
+      }
+    },
+
+    "OverconfidenceReport": {
+      "type": "object",
+      "required": ["overconfident_claims"],
+      "properties": {
+        "overconfident_claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["claim_id", "confidence_level", "establishedness_level"],
+            "properties": {
+              "claim_id": {"type": "string"},
+              "confidence_level": {"type": "string"},
+              "establishedness_level": {"type": "string"},
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "pattern_summary": {"type": "string"}
+      }
+    },
+
+    "StructuralIntegrityReport": {
+      "type": "object",
+      "required": ["foundation_health", "contradiction_count", "orphan_proportion"],
+      "properties": {
+        "foundation_health": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "contradiction_count": {"type": "integer", "minimum": 0},
+        "orphan_proportion": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "cascading_uncertainty_chain_count": {"type": "integer", "minimum": 0}
+      }
+    },
+
+    "CoherenceReport": {
+      "type": "object",
+      "required": ["graph_connectivity", "cluster_count"],
+      "properties": {
+        "graph_connectivity": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "average_path_length": {"type": "number", "minimum": 0.0},
+        "cluster_count": {"type": "integer", "minimum": 0},
+        "bridge_concept_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "fragmentation_flag": {"type": "boolean"}
+      }
+    },
+
+    "ResponseNarrative": {
+      "type": "object",
+      "required": ["narrative_text"],
+      "properties": {
+        "narrative_text": {
+          "type": "string",
+          "minLength": 50,
+          "description": "3-5 sentence plain-language summary of the analysis."
+        }
+      }
+    },
+
+    "PunchlistEntry": {
+      "type": "object",
+      "required": ["rank", "claim_id", "attention_trigger", "structural_importance", "risk_if_wrong", "suggested_verification"],
+      "properties": {
+        "rank": {"type": "integer", "minimum": 1},
+        "claim_id": {"type": "string"},
+        "claim_text": {"type": "string"},
+        "attention_trigger": {
+          "type": "string",
+          "enum": ["no_evidence", "novel_claim", "overconfident", "foundational", "contradicted", "orphaned"]
+        },
+        "structural_importance": {
+          "type": "string",
+          "enum": ["foundational", "structural", "peripheral"]
+        },
+        "risk_if_wrong": {"type": "string"},
+        "suggested_verification": {"type": "string"},
+        "suggested_query": {"type": "string"}
+      }
+    },
+
+    "VerificationPunchlist": {
+      "type": "object",
+      "required": ["entries", "overall_severity"],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/PunchlistEntry"}
+        },
+        "overall_severity": {
+          "type": "string",
+          "enum": ["minor_flags", "several_concerns", "systematic_verification_needed"]
+        },
+        "prioritization_rationale": {"type": "string"}
+      }
+    }
+  }
+}
