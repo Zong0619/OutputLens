@@ -11,10 +11,10 @@
 - A4, A5, A9, A10 implemented. 337 tests passing.
 - Full A1→A2→A3→{A4,A5}→{A9,A10} pipeline validated.
 
-**Milestone 4: Remaining Classifiers** -- COMPLETE (2026-07-27)
-- A6, A7, A11, A12, A13 implemented. 389 tests passing.
+**Milestone 5: Final Analyzers** -- COMPLETE (2026-07-27)
+- A8, A14, A15, A16 implemented. All 16 analyzers complete. 402 tests passing.
 
-**Next**: Milestone 5 (A8, A14, A15, A16) -- see `docs/ROADMAP.md`
+**The reference implementation engine is functionally complete.**
 
 ## Completed Milestones
 
@@ -70,8 +70,11 @@ are preserved in the project plan file.
 | A10 | Evidence Gap Analyzer | Implemented (M3) |
 | A11 | Novelty Index Calculator | Implemented (M4) |
 | A12 | Overconfidence Detector | Implemented (M4) |
+| A8 | Concept Relationship Mapper | Implemented (M5) |
 | A13 | Structural Integrity Analyzer | Implemented (M4) |
-| A8, A14-A16 | Remaining analyzers | Not started |
+| A14 | Conceptual Coherence Analyzer | Implemented (M5) |
+| A15 | Response Narrative Generator | Implemented (M5) |
+| A16 | Verification Punchlist Generator | Implemented (M5) |
 
 ### Tests
 
@@ -89,7 +92,8 @@ are preserved in the project plan file.
 | `tests/unit/test_a7_claim_relationships.py` | 19 | All passing |
 | `tests/unit/test_a9_a10_synthesis.py` | 15 | All passing |
 | `tests/unit/test_a11_a12_a13_synthesis.py` | 9 | All passing |
-| **Total** | **389** | **All passing** |
+| `tests/unit/test_a8_a14_a15_a16.py` | 13 | All passing |
+| **Total** | **402** | **All passing** |
 
 ### Interfaces
 

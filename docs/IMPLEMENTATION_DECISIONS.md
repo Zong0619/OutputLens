@@ -578,3 +578,45 @@ contradictions would mislead the reader and undermine trust in the analysis.
 **Stability**: Medium. Relationship detection will improve as evaluation
 reveals patterns. The contrast-vs-contradiction distinction is a permanent
 design choice.
+
+---
+
+### A15-001: Narrative Generation as Rendering Layer, Not Analysis
+
+**Date**: 2026-07-27
+**Component**: A15 (Response Narrative Generator) -- Milestone 5 planning
+**Spec Reference**: Principles 2, 4, 6, 15. Specification Chapter 15 (A15).
+
+**Choice**: A15 is a rendering layer over existing analyzer outputs. It may
+summarize findings from A9-A14 synthesis outputs but must not create new
+classifications, introduce unsupported interpretations, override existing
+analyzer results, or perform independent analysis. The narrative is a
+translation of analytical findings into plain language -- not a new analysis.
+
+**Rationale**: Keeping narrative generation separate from analysis preserves
+the Engine-First boundary (Principle 6). The narrative is an interface-friendly
+rendering of what the engine already computed. Allowing A15 to reinterpret or
+extend analysis would blur the Analysis/Interface boundary.
+
+**Stability**: High. This is a boundary constraint derived from Principle 6.
+
+---
+
+### A16-001: Verification Assistance, Not Fact-Checking
+
+**Date**: 2026-07-27
+**Component**: A16 (Verification Punchlist Generator) -- Milestone 5 planning
+**Spec Reference**: Principles 2, 4, 17. Specification Chapter 16 (A16).
+
+**Choice**: A16 generates investigation priorities only. It does not verify
+claims, determine truth, or provide final correctness judgments. Each punchlist
+entry explains WHY a claim deserves attention and suggests verification
+approaches -- not what the correct answer is.
+
+**Rationale**: OutputLens helps readers decide what to investigate, not what
+to believe (Principle 4). The punchlist is a research agenda, not a list of
+errors. This preserves the boundary between epistemological analysis and truth
+determination (Principle 17). A16 that claimed "this claim is false" would
+violate the project's non-goals.
+
+**Stability**: High. This is a constitutional constraint.
