@@ -151,3 +151,126 @@ Builder pattern would be cleaner but adds an extra abstraction layer.
 
 **Stability**: Medium. A Builder pattern may be adopted if the incremental
 mutation pattern causes bugs or complexity.
+
+---
+
+### A2-001: Rule-based deterministic sentence splitting for Phase 1.1
+
+**Date**: 2026-07-27
+**Component**: A2 Claim Extractor (`src/outputlens/analyzers/a2_claim_extractor.py`)
+**Spec Reference**: Chapter 12 (A2: Claim Extractor). Specification is silent on
+extraction methodology.
+
+**Choice**: The reference implementation uses a deterministic, rule-based approach
+with no ML dependencies. Sentence boundaries are detected via regex patterns
+with explicit abbreviation lists. All claims default to `factual_assertion` type.
+
+**Alternatives**: An independent implementation could use:
+- An LLM-based extractor (prompt the model to decompose text into claims)
+- An NLP library (spaCy, NLTK, Stanza)
+- A hybrid approach (rules for common cases, ML for edge cases)
+- A different claim type defaulting strategy
+
+**Rationale**: A rule-based approach aligns with the project's open-by-default
+philosophy (no external API dependencies), preserves model agnosticism at the
+implementation level, and guarantees deterministic output for identical input.
+The approach is intentionally simple for Phase 1.1 -- correctness and traceability
+are prioritized over sophistication. Claim type refinement is deferred to
+later phases.
+
+**Stability**: Medium. The sentence splitting approach will be augmented in
+Phases 1.2-1.5 with conjunction splitting, compound sentence handling, and
+list support. The core rule-based strategy may be supplemented or replaced
+if evaluation reveals recall/precision below targets.
+
+---
+
+### A2-002: Title vs. general abbreviation distinction
+
+**Date**: 2026-07-27
+**Component**: A2 Claim Extractor -- `_is_title_abbreviation` / `_is_general_abbreviation`
+**Spec Reference**: Specification is silent.
+
+**Choice**: Abbreviations are split into two categories:
+- **Title abbreviations** (Dr., Mr., Prof.): Never end a sentence when followed
+  by a capital letter (proper name continuation).
+- **General abbreviations** (etc., i.e., approx., Jan.): May end sentences when
+  followed by a capital letter, but do NOT end sentences when followed by a
+  digit (approx. 3.14, Jan. 2025).
+
+**Alternatives**: An independent implementation could use a single abbreviation
+list with contextual disambiguation, or a different categorization scheme.
+
+**Rationale**: The two-category distinction captures the most common sentence
+boundary ambiguity patterns without requiring complex context analysis. Title
+abbreviations are almost always followed by proper names. General abbreviations
+can appear mid-sentence or at sentence boundaries depending on context.
+
+**Stability**: Low. The abbreviation lists will expand as evaluation reveals
+additional patterns. The categorization may need refinement for edge cases.
+
+---
+
+### A2-003: All claims default to factual_assertion in Phase 1.1
+
+**Date**: 2026-07-27
+**Component**: A2 Claim Extractor -- claim type assignment
+**Spec Reference**: Chapter 19 (A2: Claim). The specification defines 9 claim
+types but does not mandate how they are assigned.
+
+**Choice**: All claims extracted in Phase 1.1 receive `claim_type="factual_assertion"`.
+No claim type classification is attempted. Type refinement is deferred to later
+phases when structural and linguistic analysis capabilities improve.
+
+**Alternatives**: An independent implementation could:
+- Use heuristics to classify claim types (question marks → meta_claim, etc.)
+- Use an LLM to classify claim types
+- Implement full claim type classification from the start
+
+**Rationale**: Phase 1.1 focuses on sentence splitting with correct position
+preservation. Claim type classification requires additional linguistic analysis
+that would distract from validating the core extraction pipeline.
+
+**Stability**: Low. This will change in Phase 1.2+ as claim type heuristics
+are introduced.
+
+---
+
+### A2-004: Supported and unsupported linguistic structures (M1)
+
+**Date**: 2026-07-27
+**Component**: A2 Claim Extractor -- all phases
+**Spec Reference**: Specification is silent on specific linguistic patterns.
+
+**Supported structures** (reliably decomposed):
+- Simple declarative sentences (period-terminated)
+- Question and exclamation sentences
+- Coordinating conjunctions with comma (", and ", ", but ", ", or ")
+  when what follows forms an independent clause
+- Subordinating conjunctions (", because", ", although", ", while")
+  when what follows forms an independent clause
+- Adverbial connectors preceded by comma/semicolon (", however", "; therefore")
+- Dash-based bullet lists (-, *, +)
+- Numbered lists (1., 2., 1), 2))
+- Common abbreviations (Dr., Mr., Prof., etc., i.e., e.g., approx., Jan., U.S.)
+
+**Unsupported structures** (not decomposed; remain as single claims):
+- Semicolon-separated clauses without explicit connectors
+- Colon-separated explanations
+- "if" conditionals (kept together as tightly coupled)
+- Relative clauses (", which ...") -- correctly kept with main clause
+- Appositives -- correctly kept with main clause
+- Nested that-clauses ("Researchers found that...")
+- Coordinating conjunctions without comma ("X and Y")
+
+**Known limitations** (false positives -- split when should not):
+- Coordinating conjunctions where the second clause is a continuation
+  of a list rather than an independent clause
+- "while" used temporally rather than contrastively (may split incorrectly)
+
+**Known limitations** (false negatives -- not split when should):
+- Semicolon-separated independent clauses
+- Complex multi-clause sentences with implicit boundaries
+
+**Stability**: Medium. These patterns will evolve as the golden dataset
+reveals additional false positive/negative patterns.

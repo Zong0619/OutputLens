@@ -1,13 +1,21 @@
 # OutputLens -- Project State
 
-**Last updated**: 2026-07-27
+**Last updated**: 2026-07-27 (Milestone 1 complete)
 **Purpose**: Living document. Updated continuously as the project evolves.
 
 ---
 
 ## Current Milestone
 
-**Milestone 0: Infrastructure** -- COMPLETE (2026-07-27)
+**Milestone 1: Claim Extraction** -- COMPLETE (2026-07-27)
+- Phase 1.1 (Basic Claim Infrastructure) -- COMPLETE
+- Phase 1.2 (Atomic Claim Extraction) -- COMPLETE
+- Phase 1.3 (Compound Sentence Handling) -- COMPLETE
+- Phase 1.4 (Lists and Enumerations) -- COMPLETE
+- Phase 1.5 (Relative Clauses and Nested Structures) -- COMPLETE
+- Phase 1.6 (Evaluation Infrastructure) -- COMPLETE
+
+**Next**: Milestone 2 (A3: Concept Extractor) -- see `docs/ROADMAP.md`
 
 ## Completed Milestones
 
@@ -15,6 +23,10 @@
   v1.0, core domain model (all A1-A19 dataclasses), Runtime Model (R1-R8 +
   text normalizer), Analyzer base contract, Orchestration layer (dependency
   resolution + execution engine). 81 unit tests passing.
+- **M1: Claim Extraction** -- Deterministic rule-based A2 Claim Extractor with
+  sentence splitting, conjunction decomposition, compound sentence handling,
+  list/enumeration support, and regression test suite. 86 unit + 18 regression
+  tests passing. Implementation decisions documented.
 
 ## Current Branch
 
@@ -49,7 +61,7 @@ are preserved in the project plan file.
 | ID | Name | Status |
 |---|---|---|
 | A1 | Text Normalizer | Implemented |
-| A2 | Claim Extractor | **Next: Milestone 1** |
+| A2 | Claim Extractor | Implemented (M1 complete) |
 | A3-A16 | All remaining analyzers | Not started |
 
 ### Tests
@@ -59,7 +71,9 @@ are preserved in the project plan file.
 | `tests/unit/test_runtime_model.py` | 24 | All passing |
 | `tests/unit/test_analysis_model.py` | 32 | All passing |
 | `tests/unit/test_orchestration.py` | 25 | All passing |
-| **Total** | **81** | **All passing** |
+| `tests/unit/test_a2_claim_extractor.py` | 86 | All passing |
+| `tests/unit/test_a2_regression.py` | 18 | All passing |
+| **Total** | **185** | **All passing** |
 
 ### Interfaces
 
@@ -67,7 +81,8 @@ None implemented. Reference CLI and web interface are scheduled for Milestone 6.
 
 ### Evaluation Infrastructure
 
-Not started. Scheduled after Milestone 3 (Classification).
+Scaffolding only (`benchmarks/golden_datasets/README.md`). Full evaluation
+infrastructure (golden datasets, evaluation harness) scheduled after M3.
 
 ---
 
@@ -93,23 +108,15 @@ The following are built, tested, and stable:
 
 ## Current Blockers
 
-None. Ready to begin Milestone 1 (A2: Claim Extractor).
+None. Ready to begin Milestone 2 (A3: Concept Extractor).
 
 ---
 
 ## Next Milestone
 
-**Milestone 1: Claim Extraction (Target: 2-3 weeks)**
+**Milestone 2: Concept Extraction** -- A3: Concept Extractor
 
-Deliverables:
-- A2: Claim Extractor -- first real analyzer implementation
-- Integration with Runtime Model and orchestration layer
-- Gold-standard evaluation set: 50-100 AI responses with manually annotated
-  claim boundaries, claim types, and confidence markers
-- Evaluation harness v0.1
-- Target: Claim extraction >80% F1 on evaluation set
-
-See `docs/ROADMAP.md` for full milestone details.
+See `docs/ROADMAP.md` and `reports/M1.md` for full milestone details.
 
 ---
 
@@ -129,17 +136,13 @@ See `docs/ROADMAP.md` for full milestone details.
 
 ## Open Implementation Questions
 
-1. **A2 implementation approach**: Should the reference Claim Extractor use
-   an LLM-based approach (breaking model agnosticism at the implementation
-   level), a rule-based NLP pipeline, or a hybrid? The specification is silent
-   on methodology -- this is an implementation decision to be recorded in
-   `IMPLEMENTATION_DECISIONS.md`.
+1. **A2 implementation approach** -- RESOLVED (2026-07-27): Rule-based
+   deterministic approach. See IMPLEMENTATION_DECISIONS.md A2-001.
 
 2. **A4 classification knowledge source**: How does the Establishedness
    Analyzer determine what is "common knowledge" vs. "domain established"?
    Options: use an LLM, use a knowledge base, use heuristics. The specification
-   does not mandate a specific approach. The reference implementation should
-   try multiple approaches and measure trade-offs.
+   does not mandate a specific approach.
 
 3. **Golden dataset annotation**: Who annotates? Domain experts vs. crowd
    workers vs. the development team? Annotation quality directly impacts
@@ -153,14 +156,16 @@ See `docs/ROADMAP.md` for full milestone details.
    (foundational claims, centrality, clusters) but does not mandate specific
    algorithms. The reference implementation should document its choices.
 
+6. **A1 output convention** -- NEW (2026-07-27): The `_bootstrap.raw_input`
+   convention for passing RawInput to A1 is an implementation artifact not
+   defined in the specification. Should be formalized or redesigned before M2.
+
 ---
 
 ## Immediate TODO
 
-- [ ] Create `docs/IMPLEMENTATION_DECISIONS.md` with initial empty register
-- [ ] Create `docs/ROADMAP.md`
-- [ ] Begin Milestone 1: design and implement A2 Claim Extractor
+- [ ] Resolve A1 `_bootstrap.raw_input` convention (codify or redesign)
+- [ ] Write `README.md` with project overview, installation, and quick start
+- [ ] Begin Milestone 2: A3 Concept Extractor
 - [ ] Build GOLD-CLAIM v0.1 (first 50 annotated AI responses)
 - [ ] Build evaluation harness v0.1 for claim extraction metrics
-- [ ] Create analyzer registration module in `src/outputlens/analyzers/`
-- [ ] Write `README.md` with project overview, installation, and quick start
