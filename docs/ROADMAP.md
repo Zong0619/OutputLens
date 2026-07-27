@@ -162,14 +162,20 @@ The project should not proceed past M3 until reasoning quality meets the
 
 ---
 
-## Post-Milestone 6: Evaluation Infrastructure
+## Milestone 6: Evaluation Infrastructure -- COMPLETE (2026-07-27)
 
 **Deliverables**:
-- [ ] Evaluation harness v1.0 (implementation-agnostic)
-- [ ] BENCH-DIVERSITY: 10,000 AI responses across models, domains, languages
-- [ ] BENCH-CHALLENGE: 500 curated difficult cases
-- [ ] BENCH-TEMPORAL: 1,000 fixed responses for regression detection
-- [ ] Public metrics dashboard (per-release trends)
+- [x] Golden dataset schemas (GOLD-CLAIM, GOLD-ESTABLISHED, GOLD-EVIDENCE,
+      GOLD-NOVELTY, GOLD-PUNCHLIST) with annotation guidelines
+- [x] Evaluation harness v0.1.0 (implementation-agnostic, 4 metric modules)
+- [x] BENCH-DIVERSITY: corpus infrastructure + 10 sample items (10 domains)
+- [x] BENCH-CHALLENGE: corpus infrastructure + 8 challenge patterns
+- [x] BENCH-TEMPORAL: corpus infrastructure + 5 items + immutability policy
+- [x] Evaluation Report v1 (EVALUATION_v1.md)
+- [x] M6-001: Evaluation Does Not Define Correctness (governance decision)
+
+**Deferred to post-M6**: Large-scale corpus population (1,000+ items),
+annotated golden dataset collection, public metrics dashboard.
 
 ---
 

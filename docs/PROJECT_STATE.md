@@ -1,6 +1,6 @@
 # OutputLens -- Project State
 
-**Last updated**: 2026-07-27 (Milestone 6 -- Evaluation Infrastructure)
+**Last updated**: 2026-07-27 (Milestone 6 complete)
 **Purpose**: Living document. Updated continuously as the project evolves.
 
 ---
@@ -11,8 +11,10 @@
 - Phase 6.1 (Golden Dataset Foundation) -- COMPLETE
 - Phase 6.2 (Evaluation Harness) -- COMPLETE
 - Phase 6.3 (Benchmark Corpora) -- COMPLETE
+- Phase 6.4 (Evaluation Report + M6 Completion) -- COMPLETE
 
-**Next**: Phase 6.3 (BENCH-DIVERSITY, BENCH-CHALLENGE, BENCH-TEMPORAL)
+**Milestone 6: Evaluation Infrastructure -- COMPLETE**. 440 tests passing.
+Next: Milestone 7 (Interfaces and Community Readiness) -- see `docs/ROADMAP.md`
 
 **Previous Milestones (all complete)**:
 - M0: Infrastructure (81 tests)
